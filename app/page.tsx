@@ -361,7 +361,7 @@ export default function Home() {
           </main>
         </div>
       </div>
-      <footer className="border-t border-border-separator pb-0 py-8 sm:py-16 text-center w-full">
+      <footer className="border-t border-border-separator pb-0 pt-8 sm:pt-16 text-center w-full">
         <div className="text-left text-2xl sm:text-3xl font-medium text-primary px-4 sm:px-8 lg:px-8 xl:px-0 mx-auto max-w-7xl" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
           cryptoi
         </div>
