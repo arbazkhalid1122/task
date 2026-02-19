@@ -7,9 +7,18 @@ import CompanyProfile from "./components/CompanyProfile";
 import ReviewCard from "./components/ReviewCard";
 import RightSidebar from "./components/RightSidebar";
 import Footer from "./components/Footer";
+import { useState, useEffect } from "react";
+import { authApi } from "../lib/api";
 
 export default function Home() {
-  const isLoggedIn = false;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in by checking session
+    authApi.me().then((response) => {
+      setIsLoggedIn(!!response.data?.user);
+    });
+  }, []);
 
   return (
     <div className="bg-bg-white text-foreground">

@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { topRatedCards } from "../data/constants";
+import { useRouter } from "next/navigation";
+import { helpMenuItems, topRatedCards } from "../data/constants";
 import Separator from "./Separator";
 import TopRatedCard from "./TopRatedCard";
+import Toast from "./Toast";
 import { authApi } from "../../lib/api";
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
@@ -14,11 +16,13 @@ interface RightSidebarProps {
 }
 
 export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignup, setIsSignup] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,44 +40,66 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
         });
         if (response.error) {
           setError(response.error);
+          setToast({ message: response.error, type: "error" });
+          setSubmitting(false);
         } else {
-          alert("Account created successfully!");
-          setEmail("");
-          setPassword("");
+          setToast({ message: "Account created successfully!", type: "success" });
+          // Session cookie is set by the backend, refresh to reflect login state
+          setTimeout(() => {
+            router.refresh();
+          }, 1000);
         }
       } else {
         const response = await authApi.login({ email, password });
         if (response.error) {
           setError(response.error);
+          setToast({ message: response.error, type: "error" });
+          setSubmitting(false);
         } else {
-          alert("Logged in successfully!");
-          setEmail("");
-          setPassword("");
+          setToast({ message: "Logged in successfully!", type: "success" });
+          // Session cookie is set by the backend, refresh to reflect login state
+          setTimeout(() => {
+            router.refresh();
+          }, 1000);
         }
       }
     } catch (error) {
-      setError("An error occurred. Please try again.");
-    } finally {
+      const errorMessage = "An error occurred. Please try again.";
+      setError(errorMessage);
+      setToast({ message: errorMessage, type: "error" });
       setSubmitting(false);
     }
   };
 
   return (
-    <aside className="space-y-3 px-4 sm:px-0 lg:pl-5 lg:relative lg:before:content-[''] lg:before:absolute lg:before:top-0 lg:before:bottom-0 lg:before:left-0 lg:before:w-[0.5px] lg:before:bg-border lg:before:h-full">
+    <>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          isVisible={!!toast}
+          onClose={() => setToast(null)}
+        />
+      )}
+      <aside className="space-y-3 px-4 sm:px-0 lg:pl-5 lg:relative lg:before:content-[''] lg:before:absolute lg:before:top-0 lg:before:bottom-0 lg:before:left-0 lg:before:w-[0.5px] lg:before:bg-border lg:before:h-full">
       {isLoggedIn ? (
-        <div className="rounded-md bg-bg-light p-4 mt-4">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-[13px] font-bold text-text-primary font-inter">Get Verified</h3>
-            <Image src="/verify.svg" alt="arrow-right" width={16} height={16} />
-          </div>
-          <Separator />
-          <p className="mt-2 text-[13px] text-text-primary font-inter leading-5">
-            Verify your company profile to unlock trust signals and more visibility.
-          </p>
-          <button className="mt-3 h-10 w-full rounded-md bg-primary text-xs font-semibold text-white opacity-100 transition-all hover:opacity-90 active:scale-[0.98]">
-            Start Verification
-          </button>
+        <div className="rounded-md bg-bg-light p-3 text-center sm:text-end px-4 sm:px-14 mt-4">
+        <div className="flex items-end justify-end gap-2">
+          <h3 className="text-[13px] font-bold text-text-primary text-end font-inter">Need Help</h3>
+          <Image src="/verify.svg" alt="arrow-right" width={16} height={16} />
         </div>
+        <Separator />
+        <div className="mt-2 space-y-2 text-[13px] text-text-quaternary text-center sm:text-end">
+          {helpMenuItems.map((item, index, array) => (
+            <div key={item}>
+              <div className="pb-1 text-center sm:text-end text-text-primary font-normal font-inter">
+                {item}
+              </div>
+              {index < array.length - 1 && <Separator />}
+            </div>
+          ))}
+        </div>
+      </div>
       ) : (
         <div>
           <div className="rounded-md bg-bg-white border border-[#E5E5E5] p-5 mt-4 z-10">
@@ -83,7 +109,11 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
             <p className="text-[13px] font-normal text-text-primary font-inter leading-[22px] text-center mt-2">
               Its free and always will be!
             </p>
-            <button className="flex items-center gap-2 w-full py-3 mx-auto mt-4 rounded-md border border-[#E5E5E5] bg-[#F0F0F0] text-sm font-semibold text-text-dark opacity-100 transition-all hover:opacity-90 active:scale-[0.98] flex items-center justify-center">
+            <button 
+              type="button"
+              disabled
+              className="flex items-center gap-2 w-full py-3 mx-auto mt-4 rounded-md border border-[#E5E5E5] bg-[#F0F0F0] text-sm font-semibold text-text-dark opacity-100 cursor-not-allowed"
+            >
               <FcGoogle size={21} />
               Continue with Google
             </button>
@@ -143,5 +173,6 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
         <TopRatedCard key={index} card={card} index={index} />
       ))}
     </aside>
+    </>
   );
 }
