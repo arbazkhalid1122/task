@@ -9,10 +9,12 @@ import RightSidebar from "./components/RightSidebar";
 import Footer from "./components/Footer";
 
 export default function Home() {
+  const isLoggedIn = false;
+
   return (
     <div className="bg-bg-white text-foreground">
       <div className="w-full px-4 sm:px-6 lg:px-8 min-h-screen mx-auto max-w-7xl">
-        <Header />
+        <Header isLoggedIn={isLoggedIn} />
 
         <div className="relative min-h-[calc(100vh-60px)] flex flex-col">
           <main className="mx-auto grid w-full max-w-none grid-cols-1 gap-5 px-0 sm:px-2 lg:px-4 lg:grid-cols-[auto_minmax(0,1fr)_340px] xl:px-0 flex-1">
@@ -26,7 +28,7 @@ export default function Home() {
               ))}
             </section>
 
-            <RightSidebar />
+            <RightSidebar isLoggedIn={isLoggedIn} />
           </main>
         </div>
       </div>

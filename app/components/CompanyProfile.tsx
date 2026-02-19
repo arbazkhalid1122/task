@@ -1,11 +1,13 @@
 import Image from "next/image";
 import { LuDot } from "react-icons/lu";
 import { companyProfile } from "../data/constants";
+import { useState } from "react";
 
 export default function CompanyProfile() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   return (
     <div className="rounded-md bg-bg-white mt-8 sm:mt-12 lg:mt-16">
-      <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-0">
+{     isLoggedIn ? <><div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-0">
         <div className="flex gap-3">
           <Image src="/logo.png" alt="company-logo" width={64} height={64} className="flex-shrink-0" />
           <div>
@@ -25,11 +27,25 @@ export default function CompanyProfile() {
       </div>
       <p className="mt-3 text-sm font-normal leading-[22px] tracking-normal text-text-primary font-inter">
         {companyProfile.description}
-      </p>
+      </p> </> :
+       <div>
+        <h1 className="text-[26px] font-semibold text-[#111111] font-inter leading-[36px] tracking-[-0.65px]">
+          Trusted Crypto Review, Complaint & Discussion
+          Platform Built on Real User Experiences, Not Hype!
+        </h1>
+        <p className="mt-3 text-[14px] font-normal text-[#333333] font-inter leading-[22px]">
+          Real crypto user experiences, verified reviews & scam warnings. Compare exchanges, wallets,
+          DeFi platforms without the hype. Join the trusted community.
+        </p>
+        <p className="mt-2 text-[13px] text-[#006633] font-normal font-inter">Read more</p>
+      </div> }
       <div className="mt-3 bg-primary-bg rounded-md flex items-center px-4 py-3 justify-between gap-3">
-        <div className="flex items-center text-sm leading-[22px] text-text-primary font-light break-words flex-1 min-w-0">
+       {isLoggedIn ? <div className="flex items-center text-sm leading-[22px] text-text-primary font-light break-words flex-1 min-w-0">
           {companyProfile.notification}
-        </div>
+        </div> : <div className="flex gap-6 items-center text-sm leading-[22px] text-text-primary font-light break-words flex-1 min-w-0">
+          <Image src="/analytics.png" alt="info" width={16} height={16} className="flex-shrink-0" />
+        150 Reviews & 27 Complaints Added Today!
+        </div> }
         <div className="rounded-full bg-bg-white p-2 text-primary w-6 h-6 flex text-[12px] items-center justify-center flex-shrink-0">X</div>
       </div>
       <div className="mt-3 rounded-md p-4 bg-bg-light">
