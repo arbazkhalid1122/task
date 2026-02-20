@@ -1,0 +1,62 @@
+{
+  "common": {
+    "search": {
+      "placeholder": "Buscar reseñas, competidores y plataformas de discusión..."
+    },
+    "auth": {
+      "signup": "Regístrate gratis",
+      "login": "Iniciar sesión",
+      "createAccount": "Crear cuenta",
+      "itsFree": "¡Es gratis y siempre lo será!",
+      "continueWithGoogle": "Continuar con Google",
+      "emailAddress": "Dirección de correo electrónico",
+      "password": "Contraseña",
+      "signUp": "Registrarse",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+      "dontHaveAccount": "¿No tienes una cuenta?",
+      "signIn": "Iniciar sesión",
+      "welcomeBack": "¡Bienvenido de nuevo! Inicia sesión para continuar."
+    },
+    "greeting": {
+      "hi": "Hola",
+      "companyname": "Nombre de empresa"
+    }
+  },
+  "header": {
+    "title": "cryptoi"
+  },
+  "sidebar": {
+    "exchanges": "Intercambios",
+    "wallets": "Billeteras",
+    "newWallets": "Nuevas billeteras",
+    "top10Wallets": "Top 10 billeteras",
+    "blacklistedWallets": "Billeteras en lista negra",
+    "hardware": "Hardware",
+    "casinos": "Casinos",
+    "games": "Juegos",
+    "nft": "NFT",
+    "language": "Español",
+    "needHelp": "Necesitas ayuda",
+    "readMessages": "Leer mensajes",
+    "editProfile": "Editar perfil"
+  },
+  "companyProfile": {
+    "visitWebsite": "Visitar sitio web",
+    "reviews": "Reseñas",
+    "companies": "Empresas",
+    "howWouldYouRate": "¿Cómo calificarías?",
+    "reviewTitle": "Título de la reseña: Escribe el titular de tu reseña aquí",
+    "reviewContent": "Comienza a escribir tu reseña, manténla simple y al grano y siempre sé educado...",
+    "submitReview": "Enviar reseña",
+    "heading": "Plataforma de Reseñas, Quejas y Discusión de Cripto Confiable Construida con Experiencias Reales de Usuarios, No Hype!",
+    "description": "Experiencias reales de usuarios de cripto, reseñas verificadas y advertencias de estafas. Compara intercambios, billeteras, plataformas DeFi sin el bombo. Únete a la comunidad confiable.",
+    "readMore": "Leer más",
+    "reviewsAddedToday": "¡150 Reseñas y 27 Quejas Agregadas Hoy!"
+  },
+  "footer": {
+    "copyright": "Copyright © 2026 Brand • Todos los derechos reservados"
+  }
+}
+
+
+

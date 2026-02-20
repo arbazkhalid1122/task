@@ -3,26 +3,36 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from 'next-intl';
 import { helpMenuItems, topRatedCards } from "../data/constants";
 import Separator from "./Separator";
 import TopRatedCard from "./TopRatedCard";
 import Toast from "./Toast";
 import { authApi } from "../../lib/api";
 import { FcGoogle } from "react-icons/fc";
-import Link from "next/link";
 
 interface RightSidebarProps {
   isLoggedIn: boolean;
 }
 
 export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
+  const t = useTranslations();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignup, setIsSignup] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [hasAuthenticated, setHasAuthenticated] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  const helpMenuTranslations: Record<string, string> = {
+    "Read Messages (29)": t('sidebar.readMessages') + " (29)",
+    "Eddit Profile": t('sidebar.editProfile'),
+    "Change Password": t('sidebar.changePassword'),
+    "File An Complaint": t('sidebar.fileComplaint'),
+    "Write An Support Ticket (4)": t('sidebar.writeSupportTicket') + " (4)",
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +54,8 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
           setSubmitting(false);
         } else {
           setToast({ message: "Account created successfully!", type: "success" });
+          setHasAuthenticated(true);
+          setSubmitting(false);
           // Session cookie is set by the backend, refresh to reflect login state
           setTimeout(() => {
             router.refresh();
@@ -57,6 +69,8 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
           setSubmitting(false);
         } else {
           setToast({ message: "Logged in successfully!", type: "success" });
+          setHasAuthenticated(true);
+          setSubmitting(false);
           // Session cookie is set by the backend, refresh to reflect login state
           setTimeout(() => {
             router.refresh();
@@ -71,6 +85,11 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
     }
   };
 
+  const handleAuthModeToggle = () => {
+    setIsSignup((prev) => !prev);
+    setError("");
+  };
+
   return (
     <>
       {toast && (
@@ -81,11 +100,11 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
           onClose={() => setToast(null)}
         />
       )}
-      <aside className="space-y-3 px-4 sm:px-0 lg:pl-5 lg:relative lg:before:content-[''] lg:before:absolute lg:before:top-0 lg:before:bottom-0 lg:before:left-0 lg:before:w-[0.5px] lg:before:bg-border lg:before:h-full">
-      {isLoggedIn ? (
+      <aside className="space-y-3 px-4 sm:px-0 lg:pl-5 sidebar-border-left">
+      {(isLoggedIn || hasAuthenticated) ? (
         <div className="rounded-md bg-bg-light p-3 text-center sm:text-end px-4 sm:px-14 mt-4">
         <div className="flex items-end justify-end gap-2">
-          <h3 className="text-[13px] font-bold text-text-primary text-end font-inter">Need Help</h3>
+          <h3 className="text-[13px] font-bold text-text-primary text-end font-inter">{t('sidebar.needHelp')}</h3>
           <Image src="/verify.svg" alt="arrow-right" width={16} height={16} />
         </div>
         <Separator />
@@ -93,7 +112,7 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
           {helpMenuItems.map((item, index, array) => (
             <div key={item}>
               <div className="pb-1 text-center sm:text-end text-text-primary font-normal font-inter">
-                {item}
+                {helpMenuTranslations[item] || item}
               </div>
               {index < array.length - 1 && <Separator />}
             </div>
@@ -102,20 +121,16 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
       </div>
       ) : (
         <div>
-          <div className="rounded-md bg-bg-white border border-[#E5E5E5] p-5 mt-4 z-10">
-            <h3 className="text-xl font-semibold text-text-primary font-inter leading-[22px] text-center">
-              Create Account
-            </h3>
-            <p className="text-[13px] font-normal text-text-primary font-inter leading-[22px] text-center mt-2">
-              Its free and always will be!
-            </p>
+          <div className="card-base border border-[#E5E5E5] p-5 mt-4 z-10">
+            <h3 className="text-heading-center">{isSignup ? t('common.auth.createAccount') : t('common.auth.signIn')}</h3>
+            <p className="text-description mt-2">{isSignup ? t('common.auth.itsFree') : t('common.auth.welcomeBack')}</p>
             <button 
               type="button"
               disabled
-              className="flex items-center gap-2 w-full py-3 mx-auto mt-4 rounded-md border border-[#E5E5E5] bg-[#F0F0F0] text-sm font-semibold text-text-dark opacity-100 cursor-not-allowed"
+              className="flex items-center justify-center gap-2 w-full py-3 mx-auto mt-4 rounded-md border border-[#E5E5E5] bg-[#F0F0F0] text-sm font-semibold text-text-dark opacity-100 cursor-not-allowed"
             >
               <FcGoogle size={21} />
-              Continue with Google
+              {t('common.auth.continueWithGoogle')}
             </button>
             <div className="mt-8 mb-8">
               <Separator className="bg-[#E5E5E5]" />
@@ -124,28 +139,24 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
 
             <form onSubmit={handleSubmit} className="">
               <div className="mb-3">
-                <label className="block text-[13px] font-semibold text-[#111111] font-inter leading-[13px] mb-2 ml-2">
-                  Email address
-                </label>
+                <label className="text-label mb-2 ml-2">{t('common.auth.emailAddress')}</label>
                 <input
                   type="email"
-                  placeholder="Enter your email address"
+                  placeholder={t('common.auth.enterEmail')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-10 rounded-md border border-[#E5E5E5] bg-bg-white px-4 text-sm text-text-dark focus:outline-none placeholder:text-text-placeholder font-inter"
+                  className="w-full input-field border-[#E5E5E5]"
                   required
                 />
               </div>
               <div className="mb-3 mt-4">
-                <label className="block text-[13px] font-semibold text-[#111111] font-inter leading-[13px] mb-2 ml-2">
-                  Password
-                </label>
+                <label className="text-label mb-2 ml-2">{t('common.auth.password')}</label>
                 <input
                   type="password"
-                  placeholder="Password"
+                  placeholder={t('common.auth.password')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-10 rounded-md border border-[#E5E5E5] bg-bg-white px-4 text-sm text-text-dark focus:outline-none placeholder:text-text-placeholder font-inter"
+                  className="w-full input-field border-[#E5E5E5]"
                   required
                 />
               </div>
@@ -155,14 +166,21 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
               <button
                 type="submit"
                 disabled={submitting}
-                className="mt-3 h-10 w-full rounded-md bg-primary text-xs font-semibold text-white opacity-100 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-3 h-10 w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitting ? "Processing..." : isSignup ? "Sign up" : "Login"}
+                {submitting ? t('common.auth.processing') : isSignup ? t('common.auth.signUp') : t('common.auth.signIn')}
               </button>
             </form>
           </div>
           <div className="bg-[#F0F0F0] border border-[#E5E5E5] p-4 rounded-b-md -z-1 -mt-2 text-center text-sm">
-            Already have an account? <Link href="/login" className="text-[#111111] font-semibold text-[13px]">Sign in</Link>
+            {isSignup ? t('common.auth.alreadyHaveAccount') : t('common.auth.dontHaveAccount')}{" "}
+            <button
+              type="button"
+              onClick={handleAuthModeToggle}
+              className="text-[#111111] font-semibold text-[13px]"
+            >
+              {isSignup ? t('common.auth.signIn') : t('common.auth.signUp')}
+            </button>
           </div>
         </div>
       )}

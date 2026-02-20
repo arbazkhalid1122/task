@@ -5,16 +5,17 @@ import { handleError, UnauthorizedError, NotFoundError } from '@/backend/lib/err
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const user = await getSession(request);
     if (!user) {
       throw new UnauthorizedError();
     }
 
     const review = await prisma.review.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!review) {
@@ -26,7 +27,7 @@ export async function POST(
       where: {
         userId_reviewId: {
           userId: user.id,
-          reviewId: params.id,
+          reviewId: id,
         },
       },
     });
@@ -38,7 +39,7 @@ export async function POST(
       });
 
       await prisma.review.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           helpfulCount: {
             decrement: 1,
@@ -52,12 +53,12 @@ export async function POST(
       await prisma.helpfulVote.create({
         data: {
           userId: user.id,
-          reviewId: params.id,
+          reviewId: id,
         },
       });
 
       await prisma.review.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           helpfulCount: {
             increment: 1,

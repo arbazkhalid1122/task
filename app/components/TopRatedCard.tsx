@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import { LuDot } from "react-icons/lu";
+import { useTranslations } from 'next-intl';
 
 interface TopRatedCardProps {
   card: {
@@ -22,10 +25,12 @@ interface TopRatedCardProps {
 }
 
 export default function TopRatedCard({ card, index }: TopRatedCardProps) {
+  const t = useTranslations();
+
   return (
     <div className={`rounded-t-md rounded-b-md border border-border-light text-white overflow-hidden ${index === 0 ? 'bg-dark-bg' : 'bg-white'}`}>
       <div className="flex items-center justify-between px-4 py-5 bg-dark-bg">
-        <h3 className="text-sm font-semibold">{card.title}</h3>
+        <h3 className="text-sm font-semibold">{t('topRated.topRatedThisWeek')}</h3>
       </div>
       <div className={`space-y-2 p-3 ${card.product.bgColor} rounded-md`}>
         <div className="flex items-start sm:items-center w-full gap-4">
@@ -48,14 +53,14 @@ export default function TopRatedCard({ card, index }: TopRatedCardProps) {
               {card.product.score}
             </span>
             <p className={`mt-1 text-xs ${card.product.textColor} font-normal break-words`}>
-              ({card.product.reviews}) <LuDot className="inline-block text-sm font-bold" /> ({card.product.companies}) Companies
+              ({card.product.reviews}) <LuDot className="inline-block text-sm font-bold" /> ({card.product.companies}) {t('companyProfile.companies')}
             </p>
           </div>
         </div>
         <div className={`h-[0.5px] mb-4 mt-4 w-full ${card.product.separatorColor}`}></div>
         <p className={`mt-2 text-[13px] ${card.product.textColor} break-words`}>{card.product.description}</p>
         <button className="mt-3 h-10 w-full rounded-md bg-primary text-xs font-semibold text-white">
-          Visit Website
+          {t('topRated.visitWebsite')}
         </button>
       </div>
     </div>

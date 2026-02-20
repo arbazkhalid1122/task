@@ -4,11 +4,12 @@ import { handleError, NotFoundError } from '@/backend/lib/errors';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const { slug } = await params;
     const company = await prisma.company.findUnique({
-      where: { slug: params.slug },
+      where: { slug },
       include: {
         _count: {
           select: {

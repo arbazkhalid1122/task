@@ -1,0 +1,85 @@
+{
+  "common": {
+    "search": {
+      "placeholder": "Bewertungen, Konkurrenten und Diskussionsplattformen suchen..."
+    },
+    "auth": {
+      "signup": "Kostenlos registrieren",
+      "login": "Anmelden",
+      "createAccount": "Konto erstellen",
+      "itsFree": "Es ist kostenlos und wird es immer sein!",
+      "continueWithGoogle": "Mit Google fortfahren",
+      "emailAddress": "E-Mail-Adresse",
+      "password": "Passwort",
+      "signUp": "Registrieren",
+      "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
+      "dontHaveAccount": "Haben Sie noch kein Konto?",
+      "signIn": "Anmelden",
+      "welcomeBack": "Willkommen zurück! Melden Sie sich an, um fortzufahren.",
+      "processing": "Wird verarbeitet...",
+      "enterEmail": "Geben Sie Ihre E-Mail-Adresse ein"
+    },
+    "greeting": {
+      "hi": "Hallo",
+      "companyname": "Firmenname"
+    },
+    "time": {
+      "hoursAgo": "Stunden"
+    },
+    "review": {
+      "comments": "Kommentare",
+      "share": "Teilen",
+      "report": "Melden",
+      "category": "Kategorie",
+      "productCategory": "Produktkategorie"
+    }
+  },
+  "header": {
+    "title": "cryptoi"
+  },
+  "sidebar": {
+    "exchanges": "Börsen",
+    "wallets": "Brieftaschen",
+    "newWallets": "Neue Brieftaschen",
+    "top10Wallets": "Top 10 Brieftaschen",
+    "blacklistedWallets": "Gesperrte Brieftaschen",
+    "hardware": "Hardware",
+    "casinos": "Casinos",
+    "games": "Spiele",
+    "nft": "NFT",
+    "language": "Deutsch",
+    "needHelp": "Hilfe benötigen",
+    "readMessages": "Nachrichten lesen",
+    "editProfile": "Profil bearbeiten",
+    "changePassword": "Passwort ändern",
+    "fileComplaint": "Beschwerde einreichen",
+    "writeSupportTicket": "Support-Ticket schreiben"
+  },
+  "alerts": {
+    "trendingNow": "Aktuell im Trend:",
+    "latestScamAlert": "Neueste Betrugswarnung:",
+    "reportsIn24hrs": "Meldungen in 24 Std."
+  },
+  "companyProfile": {
+    "visitWebsite": "Website besuchen",
+    "reviews": "Bewertungen",
+    "companies": "Unternehmen",
+    "howWouldYouRate": "Wie würden Sie bewerten?",
+    "reviewTitle": "Bewertungstitel: Schreiben Sie hier Ihre Bewertungsüberschrift",
+    "reviewContent": "Beginnen Sie mit Ihrer Bewertung, halten Sie sie einfach und auf den Punkt und seien Sie immer höflich...",
+    "submitReview": "Bewertung absenden",
+    "heading": "Vertrauenswürdige Crypto-Bewertungs-, Beschwerde- und Diskussionsplattform, die auf echten Benutzererfahrungen basiert, nicht auf Hype!",
+    "description": "Echte Crypto-Benutzererfahrungen, verifizierte Bewertungen und Betrugswarnungen. Vergleichen Sie Börsen, Brieftaschen, DeFi-Plattformen ohne den Hype. Treten Sie der vertrauenswürdigen Community bei.",
+    "readMore": "Weiterlesen",
+    "reviewsAddedToday": "150 Bewertungen und 27 Beschwerden heute hinzugefügt!"
+  },
+  "topRated": {
+    "topRatedThisWeek": "Diese Woche am besten bewertet",
+    "visitWebsite": "Website besuchen"
+  },
+  "footer": {
+    "copyright": "Copyright © 2026 Brand • Alle Rechte vorbehalten",
+    "title": "cryptoi"
+  }
+}
+

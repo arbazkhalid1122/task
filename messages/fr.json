@@ -1,0 +1,85 @@
+{
+  "common": {
+    "search": {
+      "placeholder": "Rechercher des avis, des concurrents et des plateformes de discussion..."
+    },
+    "auth": {
+      "signup": "S'inscrire gratuitement",
+      "login": "Connexion",
+      "createAccount": "Créer un compte",
+      "itsFree": "C'est gratuit et ça le restera toujours !",
+      "continueWithGoogle": "Continuer avec Google",
+      "emailAddress": "Adresse e-mail",
+      "password": "Mot de passe",
+      "signUp": "S'inscrire",
+      "alreadyHaveAccount": "Vous avez déjà un compte ?",
+      "dontHaveAccount": "Vous n'avez pas de compte ?",
+      "signIn": "Se connecter",
+      "welcomeBack": "Bon retour ! Connectez-vous pour continuer.",
+      "processing": "Traitement en cours...",
+      "enterEmail": "Entrez votre adresse e-mail"
+    },
+    "greeting": {
+      "hi": "Salut",
+      "companyname": "Nom de l'entreprise"
+    },
+    "time": {
+      "hoursAgo": "heures"
+    },
+    "review": {
+      "comments": "Commentaires",
+      "share": "Partager",
+      "report": "Signaler",
+      "category": "Catégorie",
+      "productCategory": "Catégorie de produit"
+    }
+  },
+  "header": {
+    "title": "cryptoi"
+  },
+  "sidebar": {
+    "exchanges": "Échanges",
+    "wallets": "Portefeuilles",
+    "newWallets": "Nouveaux portefeuilles",
+    "top10Wallets": "Top 10 portefeuilles",
+    "blacklistedWallets": "Portefeuilles sur liste noire",
+    "hardware": "Matériel",
+    "casinos": "Casinos",
+    "games": "Jeux",
+    "nft": "NFT",
+    "language": "Français",
+    "needHelp": "Besoin d'aide",
+    "readMessages": "Lire les messages",
+    "editProfile": "Modifier le profil",
+    "changePassword": "Changer le mot de passe",
+    "fileComplaint": "Déposer une plainte",
+    "writeSupportTicket": "Écrire un ticket de support"
+  },
+  "alerts": {
+    "trendingNow": "Tendance actuelle :",
+    "latestScamAlert": "Dernière alerte d'arnaque :",
+    "reportsIn24hrs": "signalements en 24h"
+  },
+  "companyProfile": {
+    "visitWebsite": "Visiter le site web",
+    "reviews": "Avis",
+    "companies": "Entreprises",
+    "howWouldYouRate": "Comment évalueriez-vous ?",
+    "reviewTitle": "Titre de l'avis : Écrivez le titre de votre avis ici",
+    "reviewContent": "Commencez à taper votre avis, gardez-le simple et concis et soyez toujours poli...",
+    "submitReview": "Soumettre l'avis",
+    "heading": "Plateforme de Revue, Plainte et Discussion Crypto de Confiance Construite sur de Vraies Expériences Utilisateur, Pas de Hype !",
+    "description": "Expériences réelles d'utilisateurs crypto, avis vérifiés et avertissements de fraude. Comparez les échanges, portefeuilles, plateformes DeFi sans le battage médiatique. Rejoignez la communauté de confiance.",
+    "readMore": "Lire la suite",
+    "reviewsAddedToday": "150 Avis et 27 Plaintes Ajoutés Aujourd'hui !"
+  },
+  "topRated": {
+    "topRatedThisWeek": "Les mieux notés cette semaine",
+    "visitWebsite": "Visiter le site web"
+  },
+  "footer": {
+    "copyright": "Copyright © 2026 Brand • Tous droits réservés",
+    "title": "cryptoi"
+  }
+}
+

@@ -5,11 +5,12 @@ import { handleError, NotFoundError, UnauthorizedError } from '@/backend/lib/err
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const review = await prisma.review.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         author: {
           select: {

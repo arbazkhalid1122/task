@@ -1,0 +1,51 @@
+"use client";
+
+import { reviews } from "../data/constants";
+import Header from "../components/Header";
+import LeftSidebar from "../components/LeftSidebar";
+import CompanyProfile from "../components/CompanyProfile";
+import ReviewCard from "../components/ReviewCard";
+import RightSidebar from "../components/RightSidebar";
+import Footer from "../components/Footer";
+import { useState, useEffect } from "react";
+import { authApi } from "../../lib/api";
+
+export default function Home() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if user is logged in by checking session
+    authApi.me().then((response) => {
+      setIsLoggedIn(!!response.data?.user);
+    });
+  }, []);
+
+  return (
+    <div className="bg-bg-white text-foreground">
+      <Header isLoggedIn={isLoggedIn} />
+      <div className="w-full px-4 sm:px-6 lg:px-8 min-h-screen mx-auto max-w-7xl">
+
+        <div className="relative min-h-[calc(100vh-60px)] flex flex-col">
+          <main className="mx-auto grid w-full max-w-none grid-cols-1 gap-5 px-0 sm:px-2 lg:px-4 lg:grid-cols-[auto_minmax(0,1fr)_340px] xl:px-0 flex-1">
+            <LeftSidebar />
+
+            <section className="space-y-3 mb-140 px-4 sm:px-0 font-inter">
+              <CompanyProfile />
+
+              {reviews.map((review, index) => (
+                <ReviewCard key={`${review.author}-${index}`} review={review} index={index} />
+              ))}
+            </section>
+
+            <RightSidebar isLoggedIn={isLoggedIn} />
+          </main>
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
+
+
+

@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
 import { LuDot } from "react-icons/lu";
+import { useTranslations } from 'next-intl';
 import { renderTextWithFirstWordColored } from "../utils/textUtils";
 import Separator from "./Separator";
 
@@ -17,6 +20,8 @@ interface ReviewCardProps {
 }
 
 export default function ReviewCard({ review, index }: ReviewCardProps) {
+  const t = useTranslations();
+
   return (
     <article
       key={`${review.author}-${index}`}
@@ -38,9 +43,9 @@ export default function ReviewCard({ review, index }: ReviewCardProps) {
             <div className="flex flex-col min-w-0">
               <p className="text-sm font-semibold text-green-text">{review.author}</p>
               <p className="text-xs text-text-primary break-words">
-                12 hours ago <LuDot className="inline-block text-sm font-bold text-text-dark" />{' '}
+                12 {t('common.time.hoursAgo')} <LuDot className="inline-block text-sm font-bold text-text-dark" />{' '}
                 <span className="text-primary font-semibold">
-                  Category <LuDot className="inline-block text-sm font-bold text-text-dark" /> ProductCategory
+                  {t('common.review.category')} <LuDot className="inline-block text-sm font-bold text-text-dark" /> {t('common.review.productCategory')}
                 </span>
               </p>
             </div>
@@ -54,8 +59,8 @@ export default function ReviewCard({ review, index }: ReviewCardProps) {
           <h3 className="mt-2 text-base font-semibold break-words">{renderTextWithFirstWordColored(review.title)}</h3>
           <p className="mt-1 text-[13px] font-normal leading-[22px] text-text-primary tracking-[0.1%] break-words">{review.text}</p>
           <p className="mt-3 text-xs text-text-primary break-words">
-            (26 Comments) <LuDot className="inline-block text-sm font-bold text-text-dark" /> Share{' '}
-            <LuDot className="inline-block text-sm font-bold text-text-dark" /> Report
+            (26 {t('common.review.comments')}) <LuDot className="inline-block text-sm font-bold text-text-dark" /> {t('common.review.share')}{' '}
+            <LuDot className="inline-block text-sm font-bold text-text-dark" /> {t('common.review.report')}
           </p>
         </div>
         <Image src="/verify.svg" alt="arrow-right" width={16} height={16} className="flex-shrink-0" />

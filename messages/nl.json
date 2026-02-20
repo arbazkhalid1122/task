@@ -1,0 +1,85 @@
+{
+  "common": {
+    "search": {
+      "placeholder": "Zoek recensies, concurrenten en discussieplatforms..."
+    },
+    "auth": {
+      "signup": "Gratis aanmelden",
+      "login": "Inloggen",
+      "createAccount": "Account aanmaken",
+      "itsFree": "Het is gratis en zal dat altijd blijven!",
+      "continueWithGoogle": "Doorgaan met Google",
+      "emailAddress": "E-mailadres",
+      "password": "Wachtwoord",
+      "signUp": "Aanmelden",
+      "alreadyHaveAccount": "Heeft u al een account?",
+      "dontHaveAccount": "Nog geen account?",
+      "signIn": "Inloggen",
+      "welcomeBack": "Welkom terug! Log in om door te gaan.",
+      "processing": "Verwerken...",
+      "enterEmail": "Voer uw e-mailadres in"
+    },
+    "greeting": {
+      "hi": "Hallo",
+      "companyname": "Bedrijfsnaam"
+    },
+    "time": {
+      "hoursAgo": "uur geleden"
+    },
+    "review": {
+      "comments": "Reacties",
+      "share": "Delen",
+      "report": "Rapporteren",
+      "category": "Categorie",
+      "productCategory": "Productcategorie"
+    }
+  },
+  "header": {
+    "title": "cryptoi"
+  },
+  "sidebar": {
+    "exchanges": "Beurzen",
+    "wallets": "Portemonnees",
+    "newWallets": "Nieuwe portemonnees",
+    "top10Wallets": "Top 10 portemonnees",
+    "blacklistedWallets": "Geblokkeerde portemonnees",
+    "hardware": "Hardware",
+    "casinos": "Casino's",
+    "games": "Spellen",
+    "nft": "NFT",
+    "language": "Nederlands",
+    "needHelp": "Hulp nodig",
+    "readMessages": "Berichten lezen",
+    "editProfile": "Profiel bewerken",
+    "changePassword": "Wachtwoord wijzigen",
+    "fileComplaint": "Klacht indienen",
+    "writeSupportTicket": "Supportticket schrijven"
+  },
+  "alerts": {
+    "trendingNow": "Nu trending:",
+    "latestScamAlert": "Laatste oplichtingswaarschuwing:",
+    "reportsIn24hrs": "meldingen in 24 uur"
+  },
+  "companyProfile": {
+    "visitWebsite": "Website bezoeken",
+    "reviews": "Recensies",
+    "companies": "Bedrijven",
+    "howWouldYouRate": "Hoe zou u beoordelen?",
+    "reviewTitle": "Recensietitel: Schrijf hier uw recensiehoofdregel",
+    "reviewContent": "Begin met het typen van uw recensie, houd het eenvoudig en to the point en wees altijd beleefd...",
+    "submitReview": "Recensie indienen",
+    "heading": "Vertrouwd Crypto Recensie-, Klacht- en Discussieplatform Gebouwd op Echte Gebruikerservaringen, Geen Hype!",
+    "description": "Echte crypto gebruikerservaringen, geverifieerde recensies en oplichtingswaarschuwingen. Vergelijk beurzen, portemonnees, DeFi-platforms zonder de hype. Word lid van de vertrouwde community.",
+    "readMore": "Lees meer",
+    "reviewsAddedToday": "150 Recensies en 27 Klachten Vandaag Toegevoegd!"
+  },
+  "topRated": {
+    "topRatedThisWeek": "Deze week het best beoordeeld",
+    "visitWebsite": "Website bezoeken"
+  },
+  "footer": {
+    "copyright": "Copyright © 2026 Brand • Alle rechten voorbehouden",
+    "title": "cryptoi"
+  }
+}
+
