@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/backend/lib/db';
 import { getSession } from '@/backend/lib/auth';
 import { handleError, UnauthorizedError, NotFoundError } from '@/backend/lib/errors';
+import { emitReviewVoteUpdated } from '@/lib/socket-server';
 
 export async function POST(
   request: NextRequest,
@@ -32,20 +33,34 @@ export async function POST(
       },
     });
 
+    let helpfulCount: number;
+
     if (existing) {
       // Remove vote
       await prisma.helpfulVote.delete({
         where: { id: existing.id },
       });
 
-      await prisma.review.update({
+      const updatedReview = await prisma.review.update({
         where: { id },
         data: {
           helpfulCount: {
             decrement: 1,
           },
         },
+        select: {
+          helpfulCount: true,
+        },
       });
+
+      helpfulCount = updatedReview.helpfulCount;
+
+      // Emit socket event
+      try {
+        emitReviewVoteUpdated(id, helpfulCount);
+      } catch (error) {
+        console.error('Error emitting vote updated event:', error);
+      }
 
       return NextResponse.json({ helpful: false });
     } else {
@@ -57,14 +72,26 @@ export async function POST(
         },
       });
 
-      await prisma.review.update({
+      const updatedReview = await prisma.review.update({
         where: { id },
         data: {
           helpfulCount: {
             increment: 1,
           },
         },
+        select: {
+          helpfulCount: true,
+        },
       });
+
+      helpfulCount = updatedReview.helpfulCount;
+
+      // Emit socket event
+      try {
+        emitReviewVoteUpdated(id, helpfulCount);
+      } catch (error) {
+        console.error('Error emitting vote updated event:', error);
+      }
 
       return NextResponse.json({ helpful: true });
     }

@@ -23,7 +23,7 @@ export default function Header({ isLoggedIn }: HeaderProps) {
           />
         </div>
         {isLoggedIn ? (
-          <div className="hidden items-center gap-3 text-xs text-text-tertiary lg:flex font-inter">
+          <div className="hidden items-center gap-3 text-xs text-[#111111] lg:flex font-inter">
             <span>
               {t('common.greeting.hi')}, <span className="font-bold text-text-dark">{t('common.greeting.companyname')}</span>
             </span>

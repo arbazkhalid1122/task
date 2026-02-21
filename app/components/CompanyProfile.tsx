@@ -5,10 +5,73 @@ import { LuDot } from "react-icons/lu";
 import { useTranslations } from 'next-intl';
 import { companyProfile } from "../data/constants";
 import { useState } from "react";
+import StarRating from "./StarRating";
+import { reviewsApi } from "../../lib/api";
+import { getSocket } from "../../lib/socket";
+interface CompanyProfileProps {
+  onReviewSubmitted?: (newReview?: unknown) => void;
+}
 
-export default function CompanyProfile() {
+export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProps) {
   const t = useTranslations();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [reviewTitle, setReviewTitle] = useState("");
+  const [reviewContent, setReviewContent] = useState("");
+  const [rating, setRating] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    
+    if (!reviewTitle.trim() || !reviewContent.trim()) {
+      setError("Please fill in both title and description");
+      return;
+    }
+
+    if (rating === 0) {
+      setError("Please select a rating");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const response = await reviewsApi.create({
+        title: reviewTitle,
+        content: reviewContent,
+        overallScore: rating,
+        criteriaScores: {
+          overall: rating
+        }
+      });
+
+      if (response.error) {
+        setError(response.error);
+        setSubmitting(false);
+      } else {
+        // Reset form
+        setReviewTitle("");
+        setReviewContent("");
+        setRating(0);
+        setSubmitting(false);
+        // Refresh reviews list
+        if (response.data) {
+          const socket = getSocket();
+          socket?.emit("review:created:client", response.data);
+        }
+
+        if (onReviewSubmitted) {
+          onReviewSubmitted(response.data);
+        }
+      }
+    } catch (error) {
+      setError("An error occurred. Please try again.");
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="card-base mt-8 sm:mt-12 lg:mt-16">
 {     isLoggedIn ? <><div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-0">
@@ -51,30 +114,45 @@ export default function CompanyProfile() {
         <div className="rounded-full bg-bg-white p-2 text-primary w-6 h-6 flex text-[12px] items-center justify-center flex-shrink-0">X</div>
       </div>
       <div className="mt-3 card-light p-4">
-        <div className="flex flex-col sm:flex-row h-auto sm:h-10 items-start sm:items-center border-b border-border-light px-3 py-2 sm:py-0 gap-2 sm:gap-0">
-          <span className="text-lg font-normal leading-[14px] tracking-normal text-primary-dark sm:mr-4">★★★★★★★☆☆☆</span>
-          <div className="flex flex-wrap items-center gap-1">
-            <span className="text-sm font-normal leading-[14px] tracking-normal text-text-muted font-inter">
-              {t('companyProfile.howWouldYouRate')} {'  '}
-            </span>
-            <span className="text-sm font-semibold leading-[14px] tracking-normal text-primary">
-              Companyprofile
-            </span>
+        <form onSubmit={handleSubmit}>
+          <div className="flex flex-col sm:flex-row h-auto sm:h-10 items-start sm:items-center border-b border-border-light px-3 py-2 sm:py-0 gap-2 sm:gap-0">
+            <StarRating rating={rating} onRatingChange={setRating} maxRating={10} size={18} />
+            <div className="flex flex-wrap items-center gap-1">
+              <span className="text-sm font-normal leading-[14px] tracking-normal text-[#333333] font-inter">
+                {t('companyProfile.howWouldYouRate')} {'  '}
+              </span>
+              <span className="text-sm font-semibold leading-[14px] tracking-normal text-primary">
+                Companyprofile
+              </span>
+            </div>
           </div>
-        </div>
-        <input
-          type="text"
-          placeholder={t('companyProfile.reviewTitle')}
-          className="py-3 w-full textarea-field text-base"
-        />
-        <textarea
-          placeholder={t('companyProfile.reviewContent')}
-          rows={6}
-          className="textarea-field mt-3 w-full text-[13px]"
-        />
-        <button className="h-10 w-full mt-3 rounded-md border border-text-darker bg-text-dark text-xs font-semibold text-white opacity-100 transition-all hover:opacity-90 active:scale-[0.98]">
-          {t('companyProfile.submitReview')}
-        </button>
+          <input
+            type="text"
+            placeholder={t('companyProfile.reviewTitle')}
+            value={reviewTitle}
+            onChange={(e) => setReviewTitle(e.target.value)}
+            className="py-3 w-full textarea-field text-base"
+            required
+          />
+          <textarea
+            placeholder={t('companyProfile.reviewContent')}
+            value={reviewContent}
+            onChange={(e) => setReviewContent(e.target.value)}
+            rows={6}
+            className="textarea-field mt-3 w-full text-[13px]"
+            required
+          />
+          {error && (
+            <p className="text-xs text-red-500 mt-2">{error}</p>
+          )}
+          <button 
+            type="submit"
+            disabled={submitting}
+            className="h-10 w-full mt-3 rounded-md border border-text-darker bg-text-dark text-xs font-semibold text-white opacity-100 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {submitting ? t('common.auth.processing') : t('companyProfile.submitReview')}
+          </button>
+        </form>
       </div>
     </div>
   );

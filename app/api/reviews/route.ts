@@ -3,6 +3,7 @@ import { prisma } from '@/backend/lib/db';
 import { getSession } from '@/backend/lib/auth';
 import { createReviewSchema, calculateOverallScore } from '@/backend/lib/utils';
 import { handleError, UnauthorizedError } from '@/backend/lib/errors';
+import { emitReviewCreated } from '@/lib/socket-server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -116,12 +117,44 @@ export async function POST(request: NextRequest) {
             username: true,
             avatar: true,
             verified: true,
+            reputation: true,
           },
         },
-        company: true,
-        product: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logo: true,
+            category: true,
+          },
+        },
+        product: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        _count: {
+          select: {
+            helpfulVotes: true,
+            comments: true,
+            reactions: true,
+          },
+        },
       },
     });
+
+    // Emit socket event for new review
+    try {
+      console.log('About to emit review created event for review:', review.id);
+      emitReviewCreated(review);
+      console.log('Review created event emission attempted');
+    } catch (error) {
+      console.error('Error emitting review created event:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    }
 
     return NextResponse.json(review, { status: 201 });
   } catch (error) {
