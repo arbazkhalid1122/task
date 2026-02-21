@@ -9,51 +9,103 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const category = searchParams.get('category') as any;
-    const user = await getSession(request);
+    const user = await getSession(request).catch(() => null);
 
-    // Build feed: reviews + posts
-    const where: any = {
+    // Build feed: reviews + complaints
+    const reviewWhere: any = {
       status: 'APPROVED',
       ...(category && { company: { category } }),
     };
 
-    const reviews = await prisma.review.findMany({
-      where,
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            avatar: true,
-            verified: true,
-            reputation: true,
+    const [reviews, complaints] = await Promise.all([
+      prisma.review.findMany({
+        where: reviewWhere,
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          overallScore: true,
+          helpfulCount: true,
+          downVoteCount: true,
+          createdAt: true,
+          author: {
+            select: {
+              id: true,
+              username: true,
+              avatar: true,
+              verified: true,
+              reputation: true,
+            },
+          },
+          company: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              logo: true,
+            },
+          },
+          _count: {
+            select: {
+              helpfulVotes: true,
+              comments: true,
+              reactions: true,
+            },
           },
         },
-        company: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            logo: true,
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+      }),
+      prisma.complaint.findMany({
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          status: true,
+          helpfulCount: true,
+          downVoteCount: true,
+          createdAt: true,
+          author: {
+            select: {
+              id: true,
+              username: true,
+              avatar: true,
+              verified: true,
+              reputation: true,
+            },
+          },
+          company: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              logo: true,
+            },
+          },
+          _count: {
+            select: {
+              comments: true,
+              reactions: true,
+              votes: true,
+            },
           },
         },
-        _count: {
-          select: {
-            helpfulVotes: true,
-            comments: true,
-            reactions: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+      }),
+    ]);
 
-    const total = await prisma.review.count({ where });
+    // Combine and sort by date
+    const items = [
+      ...reviews.map(r => ({ ...r, type: 'review' })),
+      ...complaints.map(c => ({ ...c, type: 'complaint' })),
+    ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+     .slice((page - 1) * limit, page * limit);
+
+    const total = reviews.length + complaints.length;
 
     return NextResponse.json({
-      items: reviews,
+      items,
       pagination: {
         page,
         limit,

@@ -32,7 +32,16 @@
       "report": "Rapporteren",
       "category": "Categorie",
       "productCategory": "Productcategorie"
-    }
+    },
+    "comment": {
+      "writeComment": "Schrijf een reactie...",
+      "post": "Reactie plaatsen",
+      "reply": "Antwoorden",
+      "replies": "Antwoorden",
+      "writeReply": "Schrijf een antwoord...",
+      "cancel": "Annuleren"
+    },
+    "cancel": "Annuleren"
   },
   "header": {
     "title": "cryptoi"
@@ -68,6 +77,11 @@
     "reviewTitle": "Recensietitel: Schrijf hier uw recensiehoofdregel",
     "reviewContent": "Begin met het typen van uw recensie, houd het eenvoudig en to the point en wees altijd beleefd...",
     "submitReview": "Recensie indienen",
+    "writeReview": "Recensie schrijven",
+    "fileComplaint": "Klacht indienen",
+    "complaintTitle": "Klachttitel",
+    "complaintContent": "Beschrijf uw klacht...",
+    "submitComplaint": "Klacht indienen",
     "heading": "Vertrouwd Crypto Recensie-, Klacht- en Discussieplatform Gebouwd op Echte Gebruikerservaringen, Geen Hype!",
     "description": "Echte crypto gebruikerservaringen, geverifieerde recensies en oplichtingswaarschuwingen. Vergelijk beurzen, portemonnees, DeFi-platforms zonder de hype. Word lid van de vertrouwde community.",
     "readMore": "Lees meer",

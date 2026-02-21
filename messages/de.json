@@ -32,7 +32,16 @@
       "report": "Melden",
       "category": "Kategorie",
       "productCategory": "Produktkategorie"
-    }
+    },
+    "comment": {
+      "writeComment": "Einen Kommentar schreiben...",
+      "post": "Kommentar posten",
+      "reply": "Antworten",
+      "replies": "Antworten",
+      "writeReply": "Eine Antwort schreiben...",
+      "cancel": "Abbrechen"
+    },
+    "cancel": "Abbrechen"
   },
   "header": {
     "title": "cryptoi"
@@ -68,6 +77,11 @@
     "reviewTitle": "Bewertungstitel: Schreiben Sie hier Ihre Bewertungsüberschrift",
     "reviewContent": "Beginnen Sie mit Ihrer Bewertung, halten Sie sie einfach und auf den Punkt und seien Sie immer höflich...",
     "submitReview": "Bewertung absenden",
+    "writeReview": "Bewertung schreiben",
+    "fileComplaint": "Beschwerde einreichen",
+    "complaintTitle": "Beschwerdetitel",
+    "complaintContent": "Beschreiben Sie Ihre Beschwerde...",
+    "submitComplaint": "Beschwerde absenden",
     "heading": "Vertrauenswürdige Crypto-Bewertungs-, Beschwerde- und Diskussionsplattform, die auf echten Benutzererfahrungen basiert, nicht auf Hype!",
     "description": "Echte Crypto-Benutzererfahrungen, verifizierte Bewertungen und Betrugswarnungen. Vergleichen Sie Börsen, Brieftaschen, DeFi-Plattformen ohne den Hype. Treten Sie der vertrauenswürdigen Community bei.",
     "readMore": "Weiterlesen",

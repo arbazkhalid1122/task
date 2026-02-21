@@ -65,6 +65,7 @@ export const createCommentSchema = z.object({
   content: z.string().min(1).max(1000),
   reviewId: z.string().optional(),
   postId: z.string().optional(),
+  complaintId: z.string().optional(),
   parentId: z.string().optional(),
 });
 

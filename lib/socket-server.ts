@@ -30,11 +30,15 @@ export function emitReviewUpdated(review: unknown) {
   io.to('reviews').emit('review:updated', review);
 }
 
-export function emitReviewVoteUpdated(reviewId: string, helpfulCount: number) {
+export function emitReviewVoteUpdated(reviewId: string, helpfulCount: number, downVoteCount?: number) {
   const io = getSocketIO();
   if (!io) {
     console.error('Socket.IO server not initialized! Cannot emit review:vote:updated event');
     return;
   }
-  io.to('reviews').emit('review:vote:updated', { reviewId, helpfulCount });
+  io.to('reviews').emit('review:vote:updated', { 
+    reviewId, 
+    helpfulCount, 
+    downVoteCount: downVoteCount ?? 0 
+  });
 }

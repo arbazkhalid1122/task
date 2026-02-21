@@ -32,7 +32,16 @@
       "report": "Signaler",
       "category": "Catégorie",
       "productCategory": "Catégorie de produit"
-    }
+    },
+    "comment": {
+      "writeComment": "Écrire un commentaire...",
+      "post": "Publier le commentaire",
+      "reply": "Répondre",
+      "replies": "Réponses",
+      "writeReply": "Écrire une réponse...",
+      "cancel": "Annuler"
+    },
+    "cancel": "Annuler"
   },
   "header": {
     "title": "cryptoi"
@@ -68,6 +77,11 @@
     "reviewTitle": "Titre de l'avis : Écrivez le titre de votre avis ici",
     "reviewContent": "Commencez à taper votre avis, gardez-le simple et concis et soyez toujours poli...",
     "submitReview": "Soumettre l'avis",
+    "writeReview": "Écrire un avis",
+    "fileComplaint": "Déposer une plainte",
+    "complaintTitle": "Titre de la plainte",
+    "complaintContent": "Décrivez votre plainte...",
+    "submitComplaint": "Soumettre la plainte",
     "heading": "Plateforme de Revue, Plainte et Discussion Crypto de Confiance Construite sur de Vraies Expériences Utilisateur, Pas de Hype !",
     "description": "Expériences réelles d'utilisateurs crypto, avis vérifiés et avertissements de fraude. Comparez les échanges, portefeuilles, plateformes DeFi sans le battage médiatique. Rejoignez la communauté de confiance.",
     "readMore": "Lire la suite",

@@ -64,7 +64,7 @@ export default function Home() {
     };
 
     // Listen for vote updates
-    const handleVoteUpdated = (data: { reviewId: string; helpfulCount: number }) => {
+    const handleVoteUpdated = (data: { reviewId: string; helpfulCount: number; downVoteCount?: number }) => {
       console.log('✅ Vote updated via socket:', data);
       if (!data || !data.reviewId) {
         console.warn('⚠️ Invalid vote data received:', data);
@@ -75,6 +75,8 @@ export default function Home() {
           review.id === data.reviewId
             ? {
                 ...review,
+                helpfulCount: data.helpfulCount,
+                downVoteCount: data.downVoteCount ?? 0,
                 _count: {
                   ...review._count,
                   helpfulVotes: data.helpfulCount,
@@ -175,7 +177,28 @@ export default function Home() {
                 <div className="text-center py-8 text-text-primary">Loading reviews...</div>
               ) : reviews.length > 0 ? (
                 reviews.map((review, index) => (
-                  <ReviewCard key={review.id || index} review={review} index={index} />
+                  <ReviewCard 
+                    key={review.id || index} 
+                    review={review} 
+                    index={index}
+                    onVoteUpdate={(reviewId, helpfulCount, downVoteCount) => {
+                      setReviews((prevReviews) =>
+                        prevReviews.map((r) =>
+                          r.id === reviewId
+                            ? {
+                                ...r,
+                                helpfulCount,
+                                downVoteCount,
+                                _count: {
+                                  ...r._count,
+                                  helpfulVotes: helpfulCount,
+                                },
+                              }
+                            : r
+                        )
+                      );
+                    }}
+                  />
                 ))
               ) : (
                 <div className="text-center py-8 text-text-primary">No reviews yet. Be the first to review!</div>

@@ -20,7 +20,27 @@
     "greeting": {
       "hi": "Hola",
       "companyname": "Nombre de empresa"
-    }
+    },
+    "time": {
+      "hoursAgo": "hace horas"
+    },
+    "review": {
+      "comments": "Comentarios",
+      "share": "Compartir",
+      "report": "Reportar",
+      "category": "Categoría",
+      "productCategory": "Categoría de producto"
+    },
+    "comment": {
+      "writeComment": "Escribe un comentario...",
+      "post": "Publicar Comentario",
+      "reply": "Responder",
+      "replies": "Respuestas",
+      "writeReply": "Escribe una respuesta...",
+      "cancel": "Cancelar"
+    },
+    "processing": "Procesando...",
+    "cancel": "Cancelar"
   },
   "header": {
     "title": "cryptoi"
@@ -48,6 +68,11 @@
     "reviewTitle": "Título de la reseña: Escribe el titular de tu reseña aquí",
     "reviewContent": "Comienza a escribir tu reseña, manténla simple y al grano y siempre sé educado...",
     "submitReview": "Enviar reseña",
+    "writeReview": "Escribir Reseña",
+    "fileComplaint": "Presentar Queja",
+    "complaintTitle": "Título de la Queja",
+    "complaintContent": "Describe tu queja...",
+    "submitComplaint": "Enviar Queja",
     "heading": "Plataforma de Reseñas, Quejas y Discusión de Cripto Confiable Construida con Experiencias Reales de Usuarios, No Hype!",
     "description": "Experiencias reales de usuarios de cripto, reseñas verificadas y advertencias de estafas. Compara intercambios, billeteras, plataformas DeFi sin el bombo. Únete a la comunidad confiable.",
     "readMore": "Leer más",
@@ -57,6 +82,7 @@
     "copyright": "Copyright © 2026 Brand • Todos los derechos reservados"
   }
 }
+
 
 
 

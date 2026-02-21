@@ -32,7 +32,17 @@
       "report": "Report",
       "category": "Category",
       "productCategory": "ProductCategory"
-    }
+    },
+    "comment": {
+      "writeComment": "Write a comment...",
+      "post": "Post Comment",
+      "reply": "Reply",
+      "replies": "Replies",
+      "writeReply": "Write a reply...",
+      "cancel": "Cancel"
+    },
+    "processing": "Processing...",
+    "cancel": "Cancel"
   },
   "header": {
     "title": "cryptoi"
@@ -68,6 +78,11 @@
     "reviewTitle": "Review title: Write your review headline here",
     "reviewContent": "Start typing your review, keep it simple and to the point and always be polite...",
     "submitReview": "Submit Review",
+    "writeReview": "Write Review",
+    "fileComplaint": "File Complaint",
+    "complaintTitle": "Complaint Title",
+    "complaintContent": "Describe your complaint...",
+    "submitComplaint": "Submit Complaint",
     "heading": "Trusted Crypto Review, Complaint & Discussion Platform Built on Real User Experiences, Not Hype!",
     "description": "Real crypto user experiences, verified reviews & scam warnings. Compare exchanges, wallets, DeFi platforms without the hype. Join the trusted community.",
     "readMore": "Read more",

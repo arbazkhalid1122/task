@@ -8,15 +8,15 @@ import { renderTextWithFirstWordColored } from "../utils/textUtils";
 import Separator from "./Separator";
 import { formatDistanceToNow } from "date-fns";
 import { useState, useEffect } from "react";
-import { reviewsApi, commentsApi } from "../../lib/api";
+import { complaintsApi, commentsApi } from "../../lib/api";
 import CommentThread from "./CommentThread";
 
-interface ReviewCardProps {
-  review: {
+interface ComplaintCardProps {
+  complaint: {
     id: string;
     title: string;
     content: string;
-    overallScore: number;
+    status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
     createdAt: string;
     helpfulCount?: number;
     downVoteCount?: number;
@@ -28,47 +28,46 @@ interface ReviewCardProps {
     };
     company?: {
       name: string;
-      category?: string;
+      logo?: string;
     };
     product?: {
       name: string;
     };
+    replies?: Array<{
+      id: string;
+      content: string;
+      createdAt: string;
+      company: {
+        name: string;
+        logo?: string;
+      };
+    }>;
     _count?: {
       comments?: number;
-      helpfulVotes?: number;
     };
   };
   index: number;
-  onVoteUpdate?: (reviewId: string, helpfulCount: number, downVoteCount: number) => void;
+  onVoteUpdate?: (complaintId: string, helpfulCount: number, downVoteCount: number) => void;
 }
 
-export default function ReviewCard({ review, index, onVoteUpdate }: ReviewCardProps) {
+const statusColors: Record<string, string> = {
+  OPEN: 'bg-yellow-100 text-yellow-800',
+  IN_PROGRESS: 'bg-blue-100 text-blue-800',
+  RESOLVED: 'bg-green-100 text-green-800',
+  CLOSED: 'bg-gray-100 text-gray-800',
+};
+
+export default function ComplaintCard({ complaint, index, onVoteUpdate }: ComplaintCardProps) {
   const t = useTranslations();
   const [isVoting, setIsVoting] = useState(false);
-  const [localHelpfulCount, setLocalHelpfulCount] = useState(review.helpfulCount ?? review._count?.helpfulVotes ?? 0);
-  const [localDownVoteCount, setLocalDownVoteCount] = useState(review.downVoteCount ?? 0);
-  const [localUserVote, setLocalUserVote] = useState<'UP' | 'DOWN' | null>(review.userVote ?? null);
+  const [localHelpfulCount, setLocalHelpfulCount] = useState(complaint.helpfulCount ?? 0);
+  const [localDownVoteCount, setLocalDownVoteCount] = useState(complaint.downVoteCount ?? 0);
+  const [localUserVote, setLocalUserVote] = useState<'UP' | 'DOWN' | null>(complaint.userVote ?? null);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<any[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [commentContent, setCommentContent] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-
-  // Render stars based on score (0-10 scale)
-  const renderStars = (score: number) => {
-    const fullStars = Math.floor(score);
-    const hasHalfStar = score % 1 >= 0.5;
-    const emptyStars = 10 - fullStars - (hasHalfStar ? 1 : 0);
-
-    return (
-      <span className="text-lg font-bold leading-[14px] tracking-normal text-primary-dark mr-4">
-        <span className="text-primary-lighter">{'★'.repeat(fullStars)}</span>
-        {hasHalfStar && <span className="text-primary-lighter">★</span>}
-        <span className="text-gray-300">{'☆'.repeat(emptyStars)}</span>
-        <span className="text-primary-lighter ml-1">{score.toFixed(1)}/10</span>
-      </span>
-    );
-  };
 
   const formatTimeAgo = (dateString: string) => {
     try {
@@ -79,16 +78,15 @@ export default function ReviewCard({ review, index, onVoteUpdate }: ReviewCardPr
     }
   };
 
-  const authorName = review.author?.username || "Anonymous";
-  const [commentCount, setCommentCount] = useState(review._count?.comments || 0);
-  const category = review.company?.category || review.product?.name || t('common.review.category');
+  const authorName = complaint.author?.username || "Anonymous";
+  const [commentCount, setCommentCount] = useState(complaint._count?.comments || 0);
 
   const handleVote = async (voteType: 'UP' | 'DOWN') => {
     if (isVoting) return;
     
     setIsVoting(true);
     try {
-      const response = await reviewsApi.vote(review.id, voteType);
+      const response = await complaintsApi.vote(complaint.id, voteType);
       if (response.error) {
         console.error('Vote error:', response.error);
         return;
@@ -99,9 +97,8 @@ export default function ReviewCard({ review, index, onVoteUpdate }: ReviewCardPr
         setLocalDownVoteCount(response.data.downVoteCount);
         setLocalUserVote(response.data.voteType);
         
-        // Notify parent component of vote update
         if (onVoteUpdate) {
-          onVoteUpdate(review.id, response.data.helpfulCount, response.data.downVoteCount);
+          onVoteUpdate(complaint.id, response.data.helpfulCount, response.data.downVoteCount);
         }
       }
     } catch (error) {
@@ -119,7 +116,7 @@ export default function ReviewCard({ review, index, onVoteUpdate }: ReviewCardPr
     
     setLoadingComments(true);
     try {
-      const response = await commentsApi.list({ reviewId: review.id });
+      const response = await commentsApi.list({ complaintId: complaint.id });
       if (response.data?.comments) {
         setComments(response.data.comments);
       }
@@ -145,7 +142,7 @@ export default function ReviewCard({ review, index, onVoteUpdate }: ReviewCardPr
     try {
       const response = await commentsApi.create({
         content: commentContent,
-        reviewId: review.id,
+        complaintId: complaint.id,
       });
 
       if (response.error) {
@@ -167,7 +164,7 @@ export default function ReviewCard({ review, index, onVoteUpdate }: ReviewCardPr
 
   return (
     <article
-      key={review.id}
+      key={complaint.id}
       className="rounded-md border border-border-light bg-bg-light p-4"
     >
       <div className="flex items-start gap-3">
@@ -212,30 +209,56 @@ export default function ReviewCard({ review, index, onVoteUpdate }: ReviewCardPr
           </span>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mb-2">
             <div className="h-10 w-10 rounded-md border border-primary-border bg-bg-white flex-shrink-0 overflow-hidden">
-              {review.author?.avatar ? (
-                <Image src={review.author.avatar} alt={authorName} width={40} height={40} className="w-full h-full object-cover" />
+              {complaint.author?.avatar ? (
+                <Image src={complaint.author.avatar} alt={authorName} width={40} height={40} className="w-full h-full object-cover" />
               ) : null}
             </div>
             <div className="flex flex-col min-w-0">
               <p className="text-sm font-semibold text-green-text">
                 {authorName}
-                {review.author?.verified && <span className="ml-1">✓</span>}
+                {complaint.author?.verified && <span className="ml-1">✓</span>}
               </p>
               <p className="text-xs text-text-primary break-words mt-0.5 flex gap-1 items-center">
-                <span className="text-[#333333] opacity-80">{formatTimeAgo(review.createdAt)}</span>
+                <span className="text-[#333333] opacity-80">{formatTimeAgo(complaint.createdAt)}</span>
                 <span className="text-[#333333] opacity-80">•</span>
-                <span className="text-primary font-semibold">
-                  {t('common.review.category')} • {t('common.review.productCategory')}
+                <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${statusColors[complaint.status] || statusColors.OPEN}`}>
+                  {complaint.status}
                 </span>
               </p>
             </div>
           </div>
           <Separator />
-          {renderStars(review.overallScore)}
-          <h3 className="mt-2 text-base font-semibold break-words">{renderTextWithFirstWordColored(review.title)}</h3>
-          <p className="mt-1 text-[13px] font-normal leading-[22px] text-text-primary tracking-[0.1%] break-words">{review.content}</p>
+          <h3 className="mt-2 text-base font-semibold break-words">{renderTextWithFirstWordColored(complaint.title)}</h3>
+          <p className="mt-1 text-[13px] font-normal leading-[22px] text-text-primary tracking-[0.1%] break-words">{complaint.content}</p>
+          
+          {/* Company replies */}
+          {complaint.replies && complaint.replies.length > 0 && (
+            <div className="mt-4 space-y-3">
+              {complaint.replies.map((reply) => (
+                <div key={reply.id} className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    {reply.company.logo && (
+                      <Image 
+                        src={reply.company.logo} 
+                        alt={reply.company.name} 
+                        width={24} 
+                        height={24} 
+                        className="rounded"
+                      />
+                    )}
+                    <span className="text-xs font-semibold text-primary">{reply.company.name}</span>
+                    <span className="text-[10px] text-text-quaternary">
+                      {formatTimeAgo(reply.createdAt)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-text-primary">{reply.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="mt-3 flex items-center gap-2">
             <button
               onClick={handleToggleComments}
@@ -281,7 +304,7 @@ export default function ReviewCard({ review, index, onVoteUpdate }: ReviewCardPr
               ) : comments.length > 0 ? (
                 <CommentThread
                   comments={comments}
-                  reviewId={review.id}
+                  complaintId={complaint.id}
                   onCommentAdded={() => {
                     fetchComments();
                   }}
@@ -304,3 +327,4 @@ export default function ReviewCard({ review, index, onVoteUpdate }: ReviewCardPr
     </article>
   );
 }
+

@@ -1,41 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/backend/lib/db';
 import { getSession } from '@/backend/lib/auth';
-import { createReviewSchema, calculateOverallScore } from '@/backend/lib/utils';
 import { handleError, UnauthorizedError } from '@/backend/lib/errors';
-import { emitReviewCreated } from '@/lib/socket-server';
+import { z } from 'zod';
+
+const createComplaintSchema = z.object({
+  title: z.string().min(1).max(200),
+  content: z.string().min(1).max(5000),
+  companyId: z.string().optional(),
+  productId: z.string().optional(),
+});
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
-    const category = searchParams.get('category') as any;
     const companyId = searchParams.get('companyId');
-    const status = searchParams.get('status') || 'APPROVED';
+    const userId = searchParams.get('userId'); // For user's personal feed
+    const username = searchParams.get('username'); // For username lookup
 
-    const where: any = {
-      ...(status && { status }),
-      ...(category && { company: { category } }),
-      ...(companyId && { companyId }),
-    };
+    const where: any = {};
+    if (companyId) where.companyId = companyId;
+    if (userId) where.authorId = userId;
+    if (username) {
+      // Find user by username first
+      const user = await prisma.user.findUnique({
+        where: { username },
+        select: { id: true },
+      });
+      if (user) {
+        where.authorId = user.id;
+      } else {
+        // Return empty if user not found
+        return NextResponse.json({
+          complaints: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+          },
+        });
+      }
+    }
 
-    // Try to get current user (optional - for vote status)
     const user = await getSession(request).catch(() => null);
 
-    const reviews = await prisma.review.findMany({
+    const complaints = await prisma.complaint.findMany({
       where,
       select: {
         id: true,
         title: true,
         content: true,
-        overallScore: true,
-        criteriaScores: true,
-        verified: true,
+        status: true,
         helpfulCount: true,
         downVoteCount: true,
         reportCount: true,
-        status: true,
         createdAt: true,
         updatedAt: true,
         authorId: true,
@@ -67,9 +88,9 @@ export async function GET(request: NextRequest) {
         },
         _count: {
           select: {
-            helpfulVotes: true,
             comments: true,
             reactions: true,
+            votes: true,
           },
         },
       },
@@ -78,40 +99,40 @@ export async function GET(request: NextRequest) {
       take: limit,
     });
 
-    // If user is logged in, get their vote status for each review
-    let reviewsWithVotes = reviews;
+    // Get user vote status if logged in
+    let complaintsWithVotes = complaints;
     if (user) {
-      const reviewIds = reviews.map(r => r.id);
-      const userVotes = await prisma.helpfulVote.findMany({
+      const complaintIds = complaints.map(c => c.id);
+      const userVotes = await prisma.complaintVote.findMany({
         where: {
           userId: user.id,
-          reviewId: { in: reviewIds },
+          complaintId: { in: complaintIds },
         },
         select: {
-          reviewId: true,
+          complaintId: true,
           voteType: true,
         },
       });
 
       const voteMap = new Map(
-        userVotes.map(v => [v.reviewId, v.voteType])
+        userVotes.map(v => [v.complaintId, v.voteType])
       );
 
-      reviewsWithVotes = reviews.map(review => ({
-        ...review,
-        userVote: voteMap.get(review.id) || null,
+      complaintsWithVotes = complaints.map(complaint => ({
+        ...complaint,
+        userVote: voteMap.get(complaint.id) || null,
       }));
     } else {
-      reviewsWithVotes = reviews.map(review => ({
-        ...review,
+      complaintsWithVotes = complaints.map(complaint => ({
+        ...complaint,
         userVote: null,
       }));
     }
 
-    const total = await prisma.review.count({ where });
+    const total = await prisma.complaint.count({ where });
 
     return NextResponse.json({
-      reviews: reviewsWithVotes,
+      complaints: complaintsWithVotes,
       pagination: {
         page,
         limit,
@@ -131,32 +152,21 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await getSession(request);
-    
-    // For now, allow unauthenticated reviews but they need extra verification
-    // In production, you might want to require authentication
     if (!user) {
-      return NextResponse.json(
-        { error: 'Please log in to submit a review. Authentication is required.' },
-        { status: 401 }
-      );
+      throw new UnauthorizedError();
     }
 
     const body = await request.json();
-    const validated = createReviewSchema.parse(body);
+    const validated = createComplaintSchema.parse(body);
 
-    // Calculate overall score if not provided
-    const overallScore = validated.overallScore || calculateOverallScore(validated.criteriaScores);
-
-    const review = await prisma.review.create({
+    const complaint = await prisma.complaint.create({
       data: {
         title: validated.title,
         content: validated.content,
         authorId: user.id,
         companyId: validated.companyId,
         productId: validated.productId,
-        overallScore,
-        criteriaScores: validated.criteriaScores,
-        status: 'APPROVED', // Published immediately without review
+        status: 'OPEN',
       },
       include: {
         author: {
@@ -174,7 +184,6 @@ export async function POST(request: NextRequest) {
             name: true,
             slug: true,
             logo: true,
-            category: true,
           },
         },
         product: {
@@ -186,32 +195,19 @@ export async function POST(request: NextRequest) {
         },
         _count: {
           select: {
-            helpfulVotes: true,
             comments: true,
             reactions: true,
+            votes: true,
           },
         },
       },
     });
 
-    // Emit socket event for new review
-    try {
-      console.log('About to emit review created event for review:', review.id);
-      emitReviewCreated(review);
-      console.log('Review created event emission attempted');
-    } catch (error) {
-      console.error('Error emitting review created event:', error);
-      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    }
-
-    return NextResponse.json(review, { status: 201 });
+    return NextResponse.json(complaint, { status: 201 });
   } catch (error) {
     const errorResponse = handleError(error);
     return NextResponse.json(
-      { 
-        error: errorResponse.message,
-        ...(errorResponse.errors && { errors: errorResponse.errors })
-      },
+      { error: errorResponse.message },
       { status: errorResponse.statusCode }
     );
   }

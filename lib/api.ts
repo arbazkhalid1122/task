@@ -143,6 +143,17 @@ export const reviewsApi = {
       method: 'POST',
     });
   },
+
+  vote: async (id: string, voteType: 'UP' | 'DOWN') => {
+    return fetchApi<{ 
+      voteType: 'UP' | 'DOWN' | null;
+      helpfulCount: number;
+      downVoteCount: number;
+    }>(`/reviews/${id}/vote`, {
+      method: 'POST',
+      body: JSON.stringify({ voteType }),
+    });
+  },
 };
 
 // Feed API
@@ -199,6 +210,105 @@ export const trendingApi = {
     return fetchApi<{
       trending: any[];
     }>(`/trending?${query.toString()}`);
+  },
+};
+
+// Complaints API
+export const complaintsApi = {
+  list: async (params?: {
+    page?: number;
+    limit?: number;
+    companyId?: string;
+    userId?: string;
+    username?: string;
+  }) => {
+    const query = new URLSearchParams();
+    if (params?.page) query.set('page', params.page.toString());
+    if (params?.limit) query.set('limit', params.limit.toString());
+    if (params?.companyId) query.set('companyId', params.companyId);
+    if (params?.userId) query.set('userId', params.userId);
+    if (params?.username) query.set('username', params.username);
+
+    return fetchApi<{
+      complaints: any[];
+      pagination: any;
+    }>(`/complaints?${query.toString()}`);
+  },
+
+  get: async (id: string) => {
+    return fetchApi<any>(`/complaints/${id}`);
+  },
+
+  create: async (data: {
+    title: string;
+    content: string;
+    companyId?: string;
+    productId?: string;
+  }) => {
+    return fetchApi<any>('/complaints', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  vote: async (id: string, voteType: 'UP' | 'DOWN') => {
+    return fetchApi<{ 
+      voteType: 'UP' | 'DOWN' | null;
+      helpfulCount: number;
+      downVoteCount: number;
+    }>(`/complaints/${id}/vote`, {
+      method: 'POST',
+      body: JSON.stringify({ voteType }),
+    });
+  },
+
+  reply: async (id: string, content: string) => {
+    return fetchApi<any>(`/complaints/${id}/reply`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    });
+  },
+};
+
+// Comments API
+export const commentsApi = {
+  list: async (params: {
+    reviewId?: string;
+    postId?: string;
+    complaintId?: string;
+  }) => {
+    const query = new URLSearchParams();
+    if (params.reviewId) query.set('reviewId', params.reviewId);
+    if (params.postId) query.set('postId', params.postId);
+    if (params.complaintId) query.set('complaintId', params.complaintId);
+
+    return fetchApi<{
+      comments: any[];
+    }>(`/comments/list?${query.toString()}`);
+  },
+
+  create: async (data: {
+    content: string;
+    reviewId?: string;
+    postId?: string;
+    complaintId?: string;
+    parentId?: string;
+  }) => {
+    return fetchApi<any>('/comments', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  vote: async (id: string, voteType: 'UP' | 'DOWN') => {
+    return fetchApi<{ 
+      voteType: 'UP' | 'DOWN' | null;
+      helpfulCount: number;
+      downVoteCount: number;
+    }>(`/comments/${id}/vote`, {
+      method: 'POST',
+      body: JSON.stringify({ voteType }),
+    });
   },
 };
 
