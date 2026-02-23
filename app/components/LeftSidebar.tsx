@@ -24,7 +24,7 @@ export default function LeftSidebar() {
   };
 
   return (
-    <aside className="space-y-2 px-4 sm:px-0 lg:pr-5 sidebar-border-right lg:min-w-[250px] font-inter">
+    <aside className="sidebar-left sidebar-border-right">
       {alerts.map((alert, index) => (
         <AlertCard key={alert.type} alert={alert} index={index} />
       ))}

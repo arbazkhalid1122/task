@@ -269,3 +269,311 @@ body {
   color: var(--color-text-primary);
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
+
+/* ========== Layout (reduce class soup in pages) ========== */
+:root {
+  --content-min-height: calc(100vh - 60px);
+}
+
+.page-container {
+  @apply w-full px-4 sm:px-6 lg:px-8 min-h-screen mx-auto max-w-7xl;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.page-main-wrap {
+  @apply relative flex flex-col flex-1;
+  min-height: var(--content-min-height);
+}
+
+.main-grid {
+  @apply mx-auto grid w-full max-w-none grid-cols-1 gap-5 px-0 sm:px-2 lg:px-4 xl:px-0 flex-1;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .main-grid {
+    grid-template-columns: auto minmax(0, 1fr) 340px;
+  }
+}
+
+.content-section {
+  @apply space-y-3 px-4 sm:px-0;
+  margin-bottom: 8.75rem;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ========== Cards (review, complaint, profile) ========== */
+.card {
+  @apply rounded-md border p-4;
+  border-color: var(--color-border-light);
+  background-color: var(--color-bg-light);
+}
+
+.card-inner {
+  @apply flex items-start gap-3;
+}
+
+.vote-rail {
+  @apply flex flex-col items-center gap-2 mt-6 flex-shrink-0;
+}
+
+.vote-count {
+  @apply text-sm font-semibold text-text-primary min-w-[20px] text-center;
+}
+
+.vote-count-down {
+  @apply text-xs text-text-quaternary text-center mt-1;
+}
+
+.avatar {
+  @apply rounded-md border flex-shrink-0 overflow-hidden;
+  border-color: var(--color-primary-border);
+  background-color: var(--color-bg-white);
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.avatar-sm {
+  width: 2rem;
+  height: 2rem;
+}
+
+.avatar-lg {
+  @apply rounded-md border flex-shrink-0 overflow-hidden;
+  border-color: var(--color-primary-border);
+  background-color: var(--color-bg-white);
+  width: 5rem;
+  height: 5rem;
+}
+
+.card-body {
+  @apply flex-1 min-w-0;
+}
+
+.card-meta {
+  @apply flex items-center gap-3;
+}
+
+.card-meta-text {
+  @apply flex flex-col min-w-0;
+}
+
+.author-name {
+  @apply text-sm font-semibold text-green-text;
+}
+
+.meta-line {
+  @apply text-xs text-text-primary break-words mt-0.5 flex gap-1 items-center;
+}
+
+.meta-muted {
+  opacity: 0.8;
+  color: var(--color-text-primary);
+}
+
+.content-body {
+  @apply text-[13px] font-normal leading-[22px] text-text-primary tracking-[0.1%] break-words mt-1;
+}
+
+.content-title {
+  @apply mt-2 text-base font-semibold break-words;
+}
+
+.action-row {
+  @apply mt-3 flex items-center gap-2;
+}
+
+.action-btn {
+  @apply text-xs text-text-primary hover:text-primary transition-colors;
+}
+
+.action-btn-strong {
+  @apply text-xs font-semibold text-text-primary hover:text-primary transition-colors;
+}
+
+.comment-section {
+  @apply mt-4 pt-4 border-t border-border-light;
+}
+
+.comment-form-textarea {
+  @apply w-full p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary rounded-md;
+  border: 1px solid var(--color-border-light);
+  background-color: var(--color-bg-white);
+  color: var(--color-text-primary);
+}
+
+.comment-submit-btn {
+  @apply mt-2 px-4 py-2 text-xs rounded-md font-semibold text-white opacity-100 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  background-color: var(--color-primary);
+}
+
+.reply-textarea {
+  @apply w-full p-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary rounded-md;
+  border: 1px solid var(--color-border-light);
+  background-color: var(--color-bg-white);
+  color: var(--color-text-primary);
+}
+
+.reply-btn {
+  @apply px-3 py-1 text-xs rounded-md font-semibold text-white opacity-100 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  background-color: var(--color-primary);
+}
+
+.reply-cancel-btn {
+  @apply px-3 py-1 text-xs rounded-md text-text-primary;
+  border: 1px solid var(--color-border-light);
+  background-color: var(--color-bg-white);
+}
+
+.reply-cancel-btn:hover {
+  background-color: var(--color-bg-light);
+}
+
+/* ========== Vote buttons (shared by cards & comments) ========== */
+.vote-btn {
+  @apply transition-all duration-200;
+}
+
+.vote-btn-active {
+  @apply opacity-100 scale-110;
+}
+
+.vote-btn-idle {
+  @apply opacity-60 hover:opacity-100 hover:scale-105;
+}
+
+.vote-btn-waiting {
+  @apply cursor-wait;
+}
+
+.vote-btn-ready {
+  @apply cursor-pointer;
+}
+
+/* ========== Header & Footer ========== */
+.header-inner {
+  @apply mx-auto flex flex-col sm:flex-row h-auto sm:h-[60px] items-center gap-3 sm:gap-5 justify-between py-3 sm:py-0 px-4 sm:px-6 lg:px-8 max-w-7xl;
+}
+
+.header-brand {
+  @apply text-2xl sm:text-3xl font-medium text-primary w-full sm:w-auto text-center sm:text-left;
+  font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+}
+
+.header-search {
+  @apply h-9 w-full max-w-[640px] rounded-md px-3 text-sm focus:outline-none;
+  border: 1px solid var(--color-primary-border);
+  background-color: var(--color-bg-lighter);
+  color: var(--color-text-dark);
+}
+
+.header-search::placeholder {
+  color: var(--color-text-primary);
+}
+
+.btn-login-outline {
+  @apply px-5 py-3 rounded text-xs font-semibold text-black opacity-100 transition-all active:scale-[0.98] hover:opacity-70;
+}
+
+.footer-inner {
+  @apply text-left text-2xl sm:text-3xl font-medium text-primary px-4 sm:px-8 lg:px-8 xl:px-0 mx-auto max-w-7xl;
+  font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+}
+
+.footer-legal {
+  @apply mt-4 text-xs text-text-light py-6 border-t border-border-separator mt-20 sm:mt-40 text-center px-4;
+}
+
+/* ========== Sidebars ========== */
+.sidebar-left {
+  @apply space-y-2 px-4 sm:px-0 lg:pr-5 lg:min-w-[250px];
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+.sidebar-right-panel {
+  @apply bg-[#F0F0F0] border border-[#E5E5E5] p-4 rounded-b-md -mt-2 text-center text-sm;
+}
+
+.btn-disabled-secondary {
+  @apply flex items-center justify-center gap-2 w-full py-3 mx-auto mt-4 rounded-md text-sm font-semibold text-text-dark opacity-100 cursor-not-allowed;
+  border: 1px solid #E5E5E5;
+  background-color: #F0F0F0;
+}
+
+/* ========== Profile (user/company) ========== */
+.profile-header-box {
+  @apply rounded-md border border-border-light bg-bg-light p-6 mb-4;
+}
+
+.profile-avatar-wrap {
+  @apply flex items-center gap-4;
+}
+
+.stats-line {
+  @apply flex gap-4 mt-2 text-sm text-text-quaternary;
+}
+
+.profile-tabs {
+  @apply flex gap-4 border-b border-border-light mb-4;
+}
+
+.profile-tab {
+  @apply pb-2 px-4 text-sm font-semibold transition-colors;
+}
+
+.profile-tab-active {
+  @apply text-primary border-b-2 border-primary;
+}
+
+.profile-tab-inactive {
+  @apply text-text-quaternary hover:text-text-primary;
+}
+
+.avatar-placeholder {
+  @apply w-full h-full bg-primary-lighter flex items-center justify-center text-2xl font-bold text-white;
+}
+
+.status-badge {
+  @apply px-2 py-0.5 rounded text-[10px] font-semibold;
+}
+
+.status-open { @apply bg-yellow-100 text-yellow-800; }
+.status-in-progress { @apply bg-blue-100 text-blue-800; }
+.status-resolved { @apply bg-green-100 text-green-800; }
+.status-closed { @apply bg-gray-100 text-gray-800; }
+
+.company-reply {
+  @apply bg-blue-50 border border-blue-200 rounded-md p-3;
+}
+
+.company-reply-header {
+  @apply flex items-center gap-2 mb-2;
+}
+
+.company-reply-meta {
+  @apply text-[10px] text-text-quaternary;
+}
+
+/* Comment thread (nested items) */
+.comment-item-vote-rail {
+  @apply flex flex-col items-center gap-1 flex-shrink-0 mt-1;
+}
+
+.comment-item-vote-count {
+  @apply text-xs font-semibold text-text-primary min-w-[16px] text-center;
+}
+
+.comment-item-vote-count-down {
+  @apply text-[10px] text-text-quaternary text-center;
+}
+
+.comment-body-text {
+  @apply text-sm text-text-primary break-words leading-relaxed;
+}
+
+.btn-submit-review {
+  @apply h-10 w-full mt-3 rounded-md text-xs font-semibold text-white opacity-100 transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  border: 1px solid var(--color-text-darker);
+  background-color: var(--color-text-dark);
+}

@@ -149,13 +149,9 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
           <div className="card-base border border-[#E5E5E5] p-5 mt-4 z-10">
             <h3 className="text-heading-center">{isSignup ? t('common.auth.createAccount') : t('common.auth.signIn')}</h3>
             <p className="text-description mt-2">{isSignup ? t('common.auth.itsFree') : t('common.auth.welcomeBack')}</p>
-            <button 
-              type="button"
-              disabled
-              className="flex items-center justify-center gap-2 w-full py-3 mx-auto mt-4 rounded-md border border-[#E5E5E5] bg-[#F0F0F0] text-sm font-semibold text-text-dark opacity-100 cursor-not-allowed"
-            >
+            <button type="button" disabled className="btn-disabled-secondary">
               <FcGoogle size={21} />
-              {t('common.auth.continueWithGoogle')}
+              {t("common.auth.continueWithGoogle")}
             </button>
             <div className="mt-8 mb-8">
               <Separator className="bg-[#E5E5E5]" />
@@ -197,8 +193,8 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
               </button>
             </form>
           </div>
-          <div className="bg-[#F0F0F0] border border-[#E5E5E5] p-4 rounded-b-md -z-1 -mt-2 text-center text-sm">
-            {isSignup ? t('common.auth.alreadyHaveAccount') : t('common.auth.dontHaveAccount')}{" "}
+          <div className="sidebar-right-panel">
+            {isSignup ? t("common.auth.alreadyHaveAccount") : t("common.auth.dontHaveAccount")}{" "}
             <button
               type="button"
               onClick={handleAuthModeToggle}

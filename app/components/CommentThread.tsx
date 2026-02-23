@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
-import Separator from "./Separator";
 import { commentsApi } from "../../lib/api";
+
+const getVoteButtonClass = (isActive: boolean, isVoting: boolean) =>
+  `vote-btn ${isActive ? "vote-btn-active" : "vote-btn-idle"} ${isVoting ? "vote-btn-waiting" : "vote-btn-ready"}`;
 
 interface Comment {
   id: string;
@@ -163,72 +165,47 @@ function CommentItem({
     }
   };
 
-  const isUpVoted = localUserVote === 'UP';
-  const isDownVoted = localUserVote === 'DOWN';
-  const marginLeft = depth * 24; // 24px per depth level
+  const isUpVoted = localUserVote === "UP";
+  const isDownVoted = localUserVote === "DOWN";
+  const marginLeft = depth * 24;
 
   return (
     <div className="flex gap-3" style={{ marginLeft: `${marginLeft}px` }}>
-      {/* Vertical line for nested comments */}
-      {depth > 0 && (
-        <div className="w-[2px] bg-border-light flex-shrink-0" />
-      )}
-      
+      {depth > 0 && <div className="w-[2px] bg-border-light flex-shrink-0" />}
+
       <div className="flex-1">
         <div className="flex items-start gap-3">
-          {/* Vote buttons */}
-          <div className="flex flex-col items-center gap-1 flex-shrink-0 mt-1">
+          <div className="comment-item-vote-rail">
             <button
-              onClick={() => handleVote('UP')}
+              onClick={() => handleVote("UP")}
               disabled={isVoting}
-              className={`transition-all duration-200 ${
-                isUpVoted 
-                  ? 'opacity-100 scale-110' 
-                  : 'opacity-60 hover:opacity-100 hover:scale-105'
-              } ${isVoting ? 'cursor-wait' : 'cursor-pointer'}`}
+              className={getVoteButtonClass(isUpVoted, isVoting)}
               aria-label="Vote up"
             >
-              <IoMdArrowUp 
-                color={isUpVoted ? "#00885E" : "#00885E"} 
-                size={16} 
-                className={isUpVoted ? 'drop-shadow-md' : ''}
-              />
+              <IoMdArrowUp color="#00885E" size={16} className={isUpVoted ? "drop-shadow-md" : ""} />
             </button>
-            <span className="text-xs font-semibold text-text-primary min-w-[16px] text-center">
-              {localHelpfulCount}
-            </span>
+            <span className="comment-item-vote-count">{localHelpfulCount}</span>
             <button
-              onClick={() => handleVote('DOWN')}
+              onClick={() => handleVote("DOWN")}
               disabled={isVoting}
-              className={`transition-all duration-200 ${
-                isDownVoted 
-                  ? 'opacity-100 scale-110' 
-                  : 'opacity-60 hover:opacity-100 hover:scale-105'
-              } ${isVoting ? 'cursor-wait' : 'cursor-pointer'}`}
+              className={getVoteButtonClass(isDownVoted, isVoting)}
               aria-label="Vote down"
             >
-              <IoMdArrowDown 
-                color={isDownVoted ? "#EA580C" : "#EA580C"} 
-                size={16}
-                className={isDownVoted ? 'drop-shadow-md' : ''}
-              />
+              <IoMdArrowDown color="#EA580C" size={16} className={isDownVoted ? "drop-shadow-md" : ""} />
             </button>
-            <span className="text-[10px] text-text-quaternary text-center">
-              {localDownVoteCount}
-            </span>
+            <span className="comment-item-vote-count-down">{localDownVoteCount}</span>
           </div>
 
-          {/* Comment content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <div className="h-8 w-8 rounded-md border border-primary-border bg-bg-white flex-shrink-0 overflow-hidden">
+              <div className="avatar avatar-sm">
                 {comment.author?.avatar ? (
-                  <Image 
-                    src={comment.author.avatar} 
-                    alt={comment.author.username} 
-                    width={32} 
-                    height={32} 
-                    className="w-full h-full object-cover" 
+                  <Image
+                    src={comment.author.avatar}
+                    alt={comment.author.username}
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-cover"
                   />
                 ) : null}
               </div>
@@ -236,57 +213,47 @@ function CommentItem({
                 {comment.author?.username || "Anonymous"}
                 {comment.author?.verified && <span className="ml-1">✓</span>}
               </span>
-              <span className="text-[10px] text-text-quaternary">
-                {formatTimeAgo(comment.createdAt)}
-              </span>
+              <span className="text-[10px] text-text-quaternary">{formatTimeAgo(comment.createdAt)}</span>
             </div>
-            <p className="text-sm text-text-primary break-words leading-relaxed">
-              {comment.content}
-            </p>
+            <p className="comment-body-text">{comment.content}</p>
             <div className="flex items-center gap-3 mt-2">
-              <button
-                onClick={() => setShowReplyForm(!showReplyForm)}
-                className="text-xs text-text-primary hover:text-primary transition-colors"
-              >
-                {t('common.comment.reply')}
+              <button type="button" onClick={() => setShowReplyForm(!showReplyForm)} className="action-btn">
+                {t("common.comment.reply")}
               </button>
               <span className="text-xs text-text-quaternary">
-                {localReplies.length} {localReplies.length === 1 ? t('common.comment.reply') : t('common.comment.replies')}
+                {localReplies.length} {localReplies.length === 1 ? t("common.comment.reply") : t("common.comment.replies")}
               </span>
             </div>
 
-            {/* Reply form */}
             {showReplyForm && (
               <div className="mt-3 space-y-2">
                 <textarea
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
-                  placeholder={t('common.comment.writeReply')}
-                  className="w-full p-2 text-sm border border-border-light rounded-md bg-bg-white text-text-primary resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder={t("common.comment.writeReply")}
+                  className="reply-textarea"
                   rows={3}
                 />
                 <div className="flex gap-2">
                   <button
+                    type="button"
                     onClick={handleReply}
                     disabled={!replyContent.trim() || isSubmitting}
-                    className="px-3 py-1 text-xs btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="reply-btn"
                   >
-                    {isSubmitting ? (t('common.processing') || t('common.auth.processing') || 'Processing...') : t('common.comment.post')}
+                    {isSubmitting ? t("common.auth.processing") || "Processing..." : t("common.comment.post")}
                   </button>
                   <button
-                    onClick={() => {
-                      setShowReplyForm(false);
-                      setReplyContent("");
-                    }}
-                    className="px-3 py-1 text-xs border border-border-light rounded-md text-text-primary hover:bg-bg-light"
+                    type="button"
+                    onClick={() => { setShowReplyForm(false); setReplyContent(""); }}
+                    className="reply-cancel-btn"
                   >
-                    {t('common.cancel') || t('common.comment.cancel') || 'Cancel'}
+                    {t("common.comment.cancel") || "Cancel"}
                   </button>
                 </div>
               </div>
             )}
 
-            {/* Nested replies */}
             {localReplies.length > 0 && depth < maxDepth && (
               <div className="mt-4 space-y-3">
                 {localReplies.map((reply) => (

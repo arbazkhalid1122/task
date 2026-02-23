@@ -1,3 +1,5 @@
+import type { Comment, Complaint, Review, UserProfile, VoteResponse } from "./types";
+
 // Client-side API utilities
 // Point to NestJS backend when running API separately (e.g. NEXT_PUBLIC_API_URL=http://localhost:3001)
 const API_BASE =
@@ -14,6 +16,17 @@ export interface ApiResponse<T> {
     total: number;
     totalPages: number;
   };
+}
+
+interface PaginatedData<T> {
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  [key: string]: unknown;
+  items?: T[];
 }
 
 async function fetchApi<T>(
@@ -62,14 +75,14 @@ export const authApi = {
     password: string;
     name?: string;
   }) => {
-    return fetchApi<{ user: any; message: string }>('/auth/register', {
+    return fetchApi<{ user: UserProfile; message: string }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
   login: async (data: { email: string; password: string }) => {
-    return fetchApi<{ user: any; message: string }>('/auth/login', {
+    return fetchApi<{ user: UserProfile; message: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -82,7 +95,7 @@ export const authApi = {
   },
 
   me: async () => {
-    return fetchApi<{ user: any }>('/auth/me');
+    return fetchApi<{ user: UserProfile }>('/auth/me');
   },
 };
 
@@ -101,13 +114,26 @@ export const companiesApi = {
     if (params?.search) query.set('search', params.search);
 
     return fetchApi<{
-      companies: any[];
-      pagination: any;
+      companies: Array<{
+        id: string;
+        name: string;
+        slug?: string;
+        logo?: string;
+        category?: string;
+      }>;
+      pagination: PaginatedData<unknown>["pagination"];
     }>(`/companies?${query.toString()}`);
   },
 
   getBySlug: async (slug: string) => {
-    return fetchApi<any>(`/companies/${slug}`);
+    return fetchApi<{
+      id: string;
+      name: string;
+      slug?: string;
+      logo?: string;
+      category?: string;
+      description?: string;
+    }>(`/companies/${slug}`);
   },
 };
 
@@ -128,13 +154,13 @@ export const reviewsApi = {
     if (params?.status) query.set('status', params.status);
 
     return fetchApi<{
-      reviews: any[];
-      pagination: any;
+      reviews: Review[];
+      pagination: PaginatedData<Review>["pagination"];
     }>(`/reviews?${query.toString()}`);
   },
 
   get: async (id: string) => {
-    return fetchApi<any>(`/reviews/${id}`);
+    return fetchApi<Review>(`/reviews/${id}`);
   },
 
   create: async (data: {
@@ -145,7 +171,7 @@ export const reviewsApi = {
     overallScore: number;
     criteriaScores: Record<string, number>;
   }) => {
-    return fetchApi<any>('/reviews', {
+    return fetchApi<Review>('/reviews', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -158,11 +184,7 @@ export const reviewsApi = {
   },
 
   vote: async (id: string, voteType: 'UP' | 'DOWN') => {
-    return fetchApi<{ 
-      voteType: 'UP' | 'DOWN' | null;
-      helpfulCount: number;
-      downVoteCount: number;
-    }>(`/reviews/${id}/vote`, {
+    return fetchApi<VoteResponse>(`/reviews/${id}/vote`, {
       method: 'POST',
       body: JSON.stringify({ voteType }),
     });
@@ -182,8 +204,8 @@ export const feedApi = {
     if (params?.category) query.set('category', params.category);
 
     return fetchApi<{
-      items: any[];
-      pagination: any;
+      items: Array<Review | Complaint>;
+      pagination: PaginatedData<Review | Complaint>["pagination"];
     }>(`/feed?${query.toString()}`);
   },
 };
@@ -202,9 +224,9 @@ export const searchApi = {
 
     return fetchApi<{
       results: {
-        companies?: any[];
-        reviews?: any[];
-        users?: any[];
+        companies?: Array<{ id: string; name: string; slug?: string }>;
+        reviews?: Review[];
+        users?: UserProfile[];
       };
     }>(`/search?${query.toString()}`);
   },
@@ -221,7 +243,7 @@ export const trendingApi = {
     if (params?.limit) query.set('limit', params.limit.toString());
 
     return fetchApi<{
-      trending: any[];
+      trending: Array<{ id: string; score: number; type: "review" | "company" | "user" }>;
     }>(`/trending?${query.toString()}`);
   },
 };
@@ -243,13 +265,13 @@ export const complaintsApi = {
     if (params?.username) query.set('username', params.username);
 
     return fetchApi<{
-      complaints: any[];
-      pagination: any;
+      complaints: Complaint[];
+      pagination: PaginatedData<Complaint>["pagination"];
     }>(`/complaints?${query.toString()}`);
   },
 
   get: async (id: string) => {
-    return fetchApi<any>(`/complaints/${id}`);
+    return fetchApi<Complaint>(`/complaints/${id}`);
   },
 
   create: async (data: {
@@ -258,25 +280,21 @@ export const complaintsApi = {
     companyId?: string;
     productId?: string;
   }) => {
-    return fetchApi<any>('/complaints', {
+    return fetchApi<Complaint>('/complaints', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
   vote: async (id: string, voteType: 'UP' | 'DOWN') => {
-    return fetchApi<{ 
-      voteType: 'UP' | 'DOWN' | null;
-      helpfulCount: number;
-      downVoteCount: number;
-    }>(`/complaints/${id}/vote`, {
+    return fetchApi<VoteResponse>(`/complaints/${id}/vote`, {
       method: 'POST',
       body: JSON.stringify({ voteType }),
     });
   },
 
   reply: async (id: string, content: string) => {
-    return fetchApi<any>(`/complaints/${id}/reply`, {
+    return fetchApi<{ id: string; content: string; createdAt: string }>(`/complaints/${id}/reply`, {
       method: 'POST',
       body: JSON.stringify({ content }),
     });
@@ -296,7 +314,7 @@ export const commentsApi = {
     if (params.complaintId) query.set('complaintId', params.complaintId);
 
     return fetchApi<{
-      comments: any[];
+      comments: Comment[];
     }>(`/comments/list?${query.toString()}`);
   },
 
@@ -307,18 +325,14 @@ export const commentsApi = {
     complaintId?: string;
     parentId?: string;
   }) => {
-    return fetchApi<any>('/comments', {
+    return fetchApi<Comment>('/comments', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
   vote: async (id: string, voteType: 'UP' | 'DOWN') => {
-    return fetchApi<{ 
-      voteType: 'UP' | 'DOWN' | null;
-      helpfulCount: number;
-      downVoteCount: number;
-    }>(`/comments/${id}/vote`, {
+    return fetchApi<VoteResponse>(`/comments/${id}/vote`, {
       method: 'POST',
       body: JSON.stringify({ voteType }),
     });
