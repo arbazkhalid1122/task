@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from 'next-intl';
+import { signIn, useSession } from "next-auth/react";
 import { helpMenuItems, topRatedCards } from "../data/constants";
 import Separator from "./Separator";
 import TopRatedCard from "./TopRatedCard";
@@ -18,6 +19,7 @@ interface RightSidebarProps {
 export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
   const t = useTranslations();
   const router = useRouter();
+  const { status } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignup, setIsSignup] = useState(true);
@@ -25,6 +27,7 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
   const [hasAuthenticated, setHasAuthenticated] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const isAuthenticated = isLoggedIn || hasAuthenticated || status === "authenticated";
 
   const helpMenuTranslations: Record<string, string> = {
     "Read Messages (29)": t('sidebar.readMessages') + " (29)",
@@ -53,6 +56,17 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
           setToast({ message: response.error, type: "error" });
           setSubmitting(false);
         } else {
+          const nextAuthSignInResult = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+          });
+          if (nextAuthSignInResult?.error) {
+            setError(nextAuthSignInResult.error);
+            setToast({ message: nextAuthSignInResult.error, type: "error" });
+            setSubmitting(false);
+            return;
+          }
           setToast({ message: "Account created successfully!", type: "success" });
           setHasAuthenticated(true);
           setSubmitting(false);
@@ -68,6 +82,17 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
           setToast({ message: response.error, type: "error" });
           setSubmitting(false);
         } else {
+          const nextAuthSignInResult = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+          });
+          if (nextAuthSignInResult?.error) {
+            setError(nextAuthSignInResult.error);
+            setToast({ message: nextAuthSignInResult.error, type: "error" });
+            setSubmitting(false);
+            return;
+          }
           setToast({ message: "Logged in successfully!", type: "success" });
           setHasAuthenticated(true);
           setSubmitting(false);
@@ -101,7 +126,7 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
         />
       )}
       <aside className="space-y-3 px-4 sm:px-0 lg:pl-5 sidebar-border-left">
-      {(isLoggedIn || hasAuthenticated) ? (
+      {isAuthenticated ? (
         <div className="rounded-md bg-bg-light p-3 text-center sm:text-end px-4 sm:px-14 mt-4">
         <div className="flex items-end justify-end gap-2">
           <h3 className="text-[13px] font-bold text-text-primary text-end font-inter">{t('sidebar.needHelp')}</h3>

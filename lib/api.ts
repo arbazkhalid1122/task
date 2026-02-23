@@ -33,7 +33,17 @@ async function fetchApi<T>(
     const data = await response.json();
 
     if (!response.ok) {
-      return { error: data.error || 'An error occurred' };
+      const fallback = 'An error occurred';
+      const message =
+        Array.isArray(data?.message) ? data.message.join(', ') : data?.message;
+      const errorLabel =
+        typeof data?.error === 'string' ? data.error.trim() : undefined;
+      const genericLabels = new Set(['Error', 'Bad Request', 'Unauthorized', 'Forbidden', 'Conflict']);
+      const normalizedError =
+        message ||
+        (errorLabel && !genericLabels.has(errorLabel) ? errorLabel : undefined) ||
+        fallback;
+      return { error: normalizedError };
     }
 
     return { data };
