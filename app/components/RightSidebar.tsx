@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from 'next-intl';
 import { signIn, useSession } from "next-auth/react";
@@ -27,14 +27,48 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
   const [hasAuthenticated, setHasAuthenticated] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isAuthenticated = isLoggedIn || hasAuthenticated || status === "authenticated";
 
-  const helpMenuTranslations: Record<string, string> = {
-    "Read Messages (29)": t('sidebar.readMessages') + " (29)",
-    "Eddit Profile": t('sidebar.editProfile'),
-    "Change Password": t('sidebar.changePassword'),
-    "File An Complaint": t('sidebar.fileComplaint'),
-    "Write An Support Ticket (4)": t('sidebar.writeSupportTicket') + " (4)",
+  useEffect(() => {
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const helpMenuTranslations = [
+    `${t('sidebar.readMessages')} (29)`,
+    t('sidebar.editProfile'),
+    t('sidebar.changePassword'),
+    t('sidebar.fileComplaint'),
+    `${t('sidebar.writeSupportTicket')} (4)`,
+  ];
+
+  const completeAuthentication = (message: string) => {
+    setToast({ message, type: "success" });
+    setHasAuthenticated(true);
+    // Session cookie is set by the backend, refresh to reflect login state.
+    refreshTimeoutRef.current = setTimeout(() => {
+      router.refresh();
+    }, 1000);
+  };
+
+  const signInWithCredentials = async () => {
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      setError(result.error);
+      setToast({ message: result.error, type: "error" });
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,68 +78,47 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
 
     try {
       if (isSignup) {
-        // Generate username from email (take part before @)
-        const username = email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "_");
+        // Generate a safe username from email local-part.
+        const usernameBase = (email.split("@")[0] || "user").trim();
+        const normalizedUsername = usernameBase
+          .replace(/[^a-zA-Z0-9_]/g, "_")
+          .replace(/^_+|_+$/g, "");
+        const username = normalizedUsername || `user_${Date.now()}`;
+
         const response = await authApi.register({
           email,
           username,
           password,
         });
+
         if (response.error) {
           setError(response.error);
           setToast({ message: response.error, type: "error" });
-          setSubmitting(false);
-        } else {
-          const nextAuthSignInResult = await signIn("credentials", {
-            email,
-            password,
-            redirect: false,
-          });
-          if (nextAuthSignInResult?.error) {
-            setError(nextAuthSignInResult.error);
-            setToast({ message: nextAuthSignInResult.error, type: "error" });
-            setSubmitting(false);
-            return;
-          }
-          setToast({ message: "Account created successfully!", type: "success" });
-          setHasAuthenticated(true);
-          setSubmitting(false);
-          // Session cookie is set by the backend, refresh to reflect login state
-          setTimeout(() => {
-            router.refresh();
-          }, 1000);
+          return;
         }
-      } else {
-        const response = await authApi.login({ email, password });
-        if (response.error) {
-          setError(response.error);
-          setToast({ message: response.error, type: "error" });
-          setSubmitting(false);
-        } else {
-          const nextAuthSignInResult = await signIn("credentials", {
-            email,
-            password,
-            redirect: false,
-          });
-          if (nextAuthSignInResult?.error) {
-            setError(nextAuthSignInResult.error);
-            setToast({ message: nextAuthSignInResult.error, type: "error" });
-            setSubmitting(false);
-            return;
-          }
-          setToast({ message: "Logged in successfully!", type: "success" });
-          setHasAuthenticated(true);
-          setSubmitting(false);
-          // Session cookie is set by the backend, refresh to reflect login state
-          setTimeout(() => {
-            router.refresh();
-          }, 1000);
+
+        if (await signInWithCredentials()) {
+          completeAuthentication("Account created successfully!");
         }
+
+        return;
       }
-    } catch (error) {
+
+      const response = await authApi.login({ email, password });
+      if (response.error) {
+        setError(response.error);
+        setToast({ message: response.error, type: "error" });
+        return;
+      }
+
+      if (await signInWithCredentials()) {
+        completeAuthentication("Logged in successfully!");
+      }
+    } catch {
       const errorMessage = "An error occurred. Please try again.";
       setError(errorMessage);
       setToast({ message: errorMessage, type: "error" });
+    } finally {
       setSubmitting(false);
     }
   };
@@ -135,9 +148,9 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
         <Separator />
         <div className="mt-2 space-y-2 text-[13px] text-text-quaternary text-center sm:text-end">
           {helpMenuItems.map((item, index, array) => (
-            <div key={item}>
+            <div key={`${item}-${index}`}>
               <div className="pb-1 text-center sm:text-end text-text-primary font-normal font-inter">
-                {helpMenuTranslations[item] || item}
+                {helpMenuTranslations[index] || item}
               </div>
               {index < array.length - 1 && <Separator />}
             </div>
@@ -160,8 +173,9 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
 
             <form onSubmit={handleSubmit} className="">
               <div className="mb-3">
-                <label className="text-label mb-2 ml-2">{t('common.auth.emailAddress')}</label>
+                <label htmlFor="sidebar-auth-email" className="text-label mb-2 ml-2">{t('common.auth.emailAddress')}</label>
                 <input
+                  id="sidebar-auth-email"
                   type="email"
                   placeholder={t('common.auth.enterEmail')}
                   value={email}
@@ -171,8 +185,9 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
                 />
               </div>
               <div className="mb-3 mt-4">
-                <label className="text-label mb-2 ml-2">{t('common.auth.password')}</label>
+                <label htmlFor="sidebar-auth-password" className="text-label mb-2 ml-2">{t('common.auth.password')}</label>
                 <input
+                  id="sidebar-auth-password"
                   type="password"
                   placeholder={t('common.auth.password')}
                   value={password}
@@ -209,7 +224,7 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
 
 
       {topRatedCards.map((card, index) => (
-        <TopRatedCard key={index} card={card} index={index} />
+        <TopRatedCard key={`${card.title}-${card.product.name}`} card={card} index={index} />
       ))}
     </aside>
     </>
