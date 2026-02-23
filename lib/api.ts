@@ -1,6 +1,9 @@
 // Client-side API utilities
-
-const API_BASE = '/api';
+// Point to NestJS backend when running API separately (e.g. NEXT_PUBLIC_API_URL=http://localhost:3001)
+const API_BASE =
+  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL
+    ? process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')
+    : '') + '/api';
 
 export interface ApiResponse<T> {
   data?: T;

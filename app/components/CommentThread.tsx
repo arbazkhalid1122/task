@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import Separator from "./Separator";
+import { commentsApi } from "../../lib/api";
 
 interface Comment {
   id: string;
@@ -108,29 +109,20 @@ function CommentItem({
 
   const handleVote = async (voteType: 'UP' | 'DOWN') => {
     if (isVoting) return;
-    
+
     setIsVoting(true);
     try {
-      const response = await fetch(`/api/comments/${comment.id}/vote`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ voteType }),
-      });
-
-      const data = await response.json();
-      if (data.error) {
-        console.error('Vote error:', data.error);
+      const result = await commentsApi.vote(comment.id, voteType);
+      if (result.error) {
+        console.error('Vote error:', result.error);
         return;
       }
-
-      if (data.data) {
-        setLocalHelpfulCount(data.data.helpfulCount);
-        setLocalDownVoteCount(data.data.downVoteCount);
-        setLocalUserVote(data.data.voteType);
-        
+      if (result.data) {
+        setLocalHelpfulCount(result.data.helpfulCount);
+        setLocalDownVoteCount(result.data.downVoteCount);
+        setLocalUserVote(result.data.voteType ?? null);
         if (onVoteUpdate) {
-          onVoteUpdate(comment.id, data.data.helpfulCount, data.data.downVoteCount);
+          onVoteUpdate(comment.id, result.data.helpfulCount, result.data.downVoteCount);
         }
       }
     } catch (error) {
@@ -145,27 +137,19 @@ function CommentItem({
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/comments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          content: replyContent,
-          reviewId,
-          postId,
-          complaintId,
-          parentId: comment.id,
-        }),
+      const result = await commentsApi.create({
+        content: replyContent,
+        reviewId,
+        postId,
+        complaintId,
+        parentId: comment.id,
       });
-
-      const data = await response.json();
-      if (data.error) {
-        console.error('Reply error:', data.error);
+      if (result.error) {
+        console.error('Reply error:', result.error);
         return;
       }
-
-      if (data.data) {
-        setLocalReplies([...localReplies, data.data]);
+      if (result.data) {
+        setLocalReplies([...localReplies, result.data]);
         setReplyContent("");
         setShowReplyForm(false);
         if (onCommentAdded) {
