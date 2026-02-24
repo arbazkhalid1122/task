@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node server.js",
-    "build": "prisma generate --schema=./backend/prisma/schema.prisma && next build",
+    "build": "next build",
     "start": "NODE_ENV=production node server.js",
     "lint": "eslint",
     "db:generate": "node scripts/setup-env.js && prisma generate --schema=./backend/prisma/schema.prisma",

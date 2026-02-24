@@ -1,5 +1,5 @@
 {
-  "buildCommand": "prisma generate --schema=./backend/prisma/schema.prisma && next build",
+  "buildCommand": "npm run build",
   "installCommand": "npm install",
   "framework": "nextjs"
 }
