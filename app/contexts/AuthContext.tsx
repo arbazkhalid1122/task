@@ -17,9 +17,20 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<UserProfile | null>(null);
+interface InitialAuth {
+  isLoggedIn: boolean;
+  user: UserProfile | null;
+}
+
+export function AuthProvider({
+  children,
+  initialAuth,
+}: {
+  children: React.ReactNode;
+  initialAuth?: InitialAuth | null;
+}) {
+  const [isLoggedIn, setIsLoggedIn] = useState(initialAuth?.isLoggedIn ?? false);
+  const [user, setUser] = useState<UserProfile | null>(initialAuth?.user ?? null);
   const { showToast } = useToast();
 
   const refreshAuth = useCallback(async () => {
@@ -33,8 +44,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [showToast]);
 
   useEffect(() => {
-    void refreshAuth();
-  }, [refreshAuth]);
+    if (initialAuth != null) {
+      setIsLoggedIn(initialAuth.isLoggedIn);
+      setUser(initialAuth.user ?? null);
+    }
+  }, [initialAuth?.isLoggedIn, initialAuth?.user]);
+
+  useEffect(() => {
+    if (initialAuth == null) {
+      void refreshAuth();
+    }
+  }, [initialAuth, refreshAuth]);
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, user, refreshAuth }}>

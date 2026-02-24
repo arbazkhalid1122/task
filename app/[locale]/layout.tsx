@@ -1,7 +1,9 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { routing } from '@/i18n/routing';
 import Providers from '@/app/providers';
+import { getServerAuth } from '@/lib/server-api';
 import { Geist, Geist_Mono, Inter, Space_Grotesk } from "next/font/google";
 import "../globals.css";
 
@@ -46,12 +48,16 @@ export default async function LocaleLayout({
   // Load messages directly to avoid relying on next-intl config alias resolution.
   const messages = (await import(`../../messages/${locale}.json`)).default;
 
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.toString();
+  const initialAuth = await getServerAuth(cookieHeader);
+
   return (
     <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${spaceGrotesk.variable} antialiased`}
       >
-        <Providers>
+        <Providers initialAuth={initialAuth}>
           <NextIntlClientProvider messages={messages}>
             {children}
           </NextIntlClientProvider>

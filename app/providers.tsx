@@ -3,12 +3,24 @@
 import { SessionProvider } from 'next-auth/react';
 import { ToastProvider } from '@/app/contexts/ToastContext';
 import { AuthProvider } from '@/app/contexts/AuthContext';
+import type { UserProfile } from '@/lib/types';
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+export interface InitialAuth {
+  isLoggedIn: boolean;
+  user: UserProfile | null;
+}
+
+export default function Providers({
+  children,
+  initialAuth,
+}: {
+  children: React.ReactNode;
+  initialAuth?: InitialAuth;
+}) {
   return (
     <SessionProvider>
       <ToastProvider>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider initialAuth={initialAuth}>{children}</AuthProvider>
       </ToastProvider>
     </SessionProvider>
   );

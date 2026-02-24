@@ -12,9 +12,9 @@ interface VoteUpdatePayload {
   downVoteCount?: number;
 }
 
-export function useReviewsFeed() {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
+export function useReviewsFeed(initialReviews?: Review[]) {
+  const [reviews, setReviews] = useState<Review[]>(initialReviews ?? []);
+  const [loading, setLoading] = useState(initialReviews == null);
   const { socket } = useSocket();
   const { showToast } = useToast();
 
@@ -51,8 +51,10 @@ export function useReviewsFeed() {
   }, []);
 
   useEffect(() => {
-    void fetchReviews();
-  }, [fetchReviews]);
+    if (initialReviews == null) {
+      void fetchReviews();
+    }
+  }, [fetchReviews, initialReviews]);
 
   useEffect(() => {
     if (!socket) return;

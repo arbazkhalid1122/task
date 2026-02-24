@@ -78,7 +78,8 @@ export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProp
   };
 
   return (
-    <div className="card-base mt-8 sm:mt-12 lg:mt-16">
+    <div className="pt-8 sm:pt-12 lg:pt-16">
+      <div className="card-base">
       {isLoggedIn ? (
         <>
           <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-0">
@@ -103,7 +104,7 @@ export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProp
         </>
       ) : (
         <div>
-          <h1 className="text-[26px] mt-16 font-semibold text-text-darker font-inter leading-9 tracking-tight">
+          <h1 className="text-[26px] font-semibold text-text-darker font-inter leading-9 tracking-tight">
             {t("companyProfile.heading")}
           </h1>
           <p className="mt-3 text-sm font-normal text-text-primary font-inter leading-[22px]">{t("companyProfile.description")}</p>
@@ -159,6 +160,7 @@ export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProp
           </form>
         </div>
       )}
+      </div>
     </div>
   );
 }
