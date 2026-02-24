@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { commentsApi } from "@/lib/api";
 import type { Comment } from "@/lib/types";
+import { createCommentSchema } from "@/lib/validations";
+import { useToast } from "@/app/contexts/ToastContext";
+import { safeApiMessage } from "@/lib/apiErrors";
 
 type CommentTargetKey = "reviewId" | "complaintId" | "postId";
 
@@ -13,6 +16,7 @@ interface UseCommentsOptions {
 }
 
 export function useComments({ targetKey, targetId, initialCount = 0 }: UseCommentsOptions) {
+  const { showToast } = useToast();
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
@@ -30,9 +34,9 @@ export function useComments({ targetKey, targetId, initialCount = 0 }: UseCommen
       const response = await commentsApi.list(buildCommentFilter());
       if (response.data?.comments) {
         setComments(response.data.comments);
+      } else if (response.error) {
+        showToast(safeApiMessage(response.error), "error");
       }
-    } catch (error) {
-      console.error("Error fetching comments:", error);
     } finally {
       setLoadingComments(false);
     }
@@ -46,22 +50,38 @@ export function useComments({ targetKey, targetId, initialCount = 0 }: UseCommen
   };
 
   const submitComment = async () => {
+    const filter = buildCommentFilter();
+    const parsed = createCommentSchema.safeParse({
+      content: commentContent,
+      ...filter,
+    });
+    if (!parsed.success) {
+      const first = parsed.error.issues[0];
+      showToast(first?.message ?? "Validation failed", "error");
+      return;
+    }
     if (!commentContent.trim() || isSubmittingComment) return;
 
     setIsSubmittingComment(true);
     try {
       const response = await commentsApi.create({
-        content: commentContent,
-        ...buildCommentFilter(),
+        content: parsed.data.content,
+        ...filter,
       });
 
-      if (response.error || !response.data) return;
-      const createdComment = response.data;
-      setComments((prev) => [createdComment, ...prev]);
-      setCommentContent("");
-      setCommentCount((prev) => prev + 1);
-    } catch (error) {
-      console.error("Error submitting comment:", error);
+      if (response.error) {
+        showToast(safeApiMessage(response.error), "error");
+        return;
+      }
+      if (response.data) {
+        const createdComment = response.data;
+        setComments((prev) => [createdComment, ...prev]);
+        setCommentContent("");
+        setCommentCount((prev) => prev + 1);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Something went wrong.";
+      showToast(safeApiMessage(msg), "error");
     } finally {
       setIsSubmittingComment(false);
     }

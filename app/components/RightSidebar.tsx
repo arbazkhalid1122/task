@@ -10,6 +10,7 @@ import Separator from "./Separator";
 import TopRatedCard from "./TopRatedCard";
 import Toast from "./Toast";
 import { authApi } from "../../lib/api";
+import { loginSchema, registerSchema } from "../../lib/validations";
 import { FcGoogle } from "react-icons/fc";
 
 interface RightSidebarProps {
@@ -78,17 +79,26 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
 
     try {
       if (isSignup) {
-        // Generate a safe username from email local-part.
         const usernameBase = (email.split("@")[0] || "user").trim();
         const normalizedUsername = usernameBase
           .replace(/[^a-zA-Z0-9_]/g, "_")
           .replace(/^_+|_+$/g, "");
         const username = normalizedUsername || `user_${Date.now()}`;
 
+        const parsed = registerSchema.safeParse({ email, username, password });
+        if (!parsed.success) {
+          const first = parsed.error.issues[0];
+          const msg = first?.message ?? "Validation failed";
+          setError(msg);
+          setToast({ message: msg, type: "error" });
+          setSubmitting(false);
+          return;
+        }
+
         const response = await authApi.register({
-          email,
-          username,
-          password,
+          email: parsed.data.email,
+          username: parsed.data.username,
+          password: parsed.data.password,
         });
 
         if (response.error) {
@@ -104,7 +114,17 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
         return;
       }
 
-      const response = await authApi.login({ email, password });
+      const parsed = loginSchema.safeParse({ email, password });
+      if (!parsed.success) {
+        const first = parsed.error.issues[0];
+        const msg = first?.message ?? "Validation failed";
+        setError(msg);
+        setToast({ message: msg, type: "error" });
+        setSubmitting(false);
+        return;
+      }
+
+      const response = await authApi.login({ email: parsed.data.email, password: parsed.data.password });
       if (response.error) {
         setError(response.error);
         setToast({ message: response.error, type: "error" });

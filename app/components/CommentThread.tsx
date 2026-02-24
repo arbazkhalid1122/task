@@ -6,6 +6,9 @@ import { useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { commentsApi } from "../../lib/api";
+import { createCommentSchema } from "../../lib/validations";
+import { useToast } from "@/app/contexts/ToastContext";
+import { safeApiMessage } from "../../lib/apiErrors";
 
 const getVoteButtonClass = (isActive: boolean, isVoting: boolean) =>
   `vote-btn ${isActive ? "vote-btn-active" : "vote-btn-idle"} ${isVoting ? "vote-btn-waiting" : "vote-btn-ready"}`;
@@ -91,9 +94,11 @@ function CommentItem({
   maxDepth 
 }: CommentItemProps) {
   const t = useTranslations();
+  const { showToast } = useToast();
   const [isVoting, setIsVoting] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState("");
+  const [replyError, setReplyError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localHelpfulCount, setLocalHelpfulCount] = useState(comment.helpfulCount || 0);
   const [localDownVoteCount, setLocalDownVoteCount] = useState(comment.downVoteCount || 0);
@@ -116,7 +121,7 @@ function CommentItem({
     try {
       const result = await commentsApi.vote(comment.id, voteType);
       if (result.error) {
-        console.error('Vote error:', result.error);
+        showToast(safeApiMessage(result.error), "error");
         return;
       }
       if (result.data) {
@@ -127,39 +132,54 @@ function CommentItem({
           onVoteUpdate(comment.id, result.data.helpfulCount, result.data.downVoteCount);
         }
       }
-    } catch (error) {
-      console.error('Error voting:', error);
     } finally {
       setIsVoting(false);
     }
   };
 
   const handleReply = async () => {
+    setReplyError("");
+    const parsed = createCommentSchema.safeParse({
+      content: replyContent,
+      reviewId,
+      postId,
+      complaintId,
+      parentId: comment.id,
+    });
+    if (!parsed.success) {
+      const first = parsed.error.issues[0];
+      setReplyError(first?.message ?? "Validation failed");
+      return;
+    }
     if (!replyContent.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
     try {
       const result = await commentsApi.create({
-        content: replyContent,
-        reviewId,
-        postId,
-        complaintId,
-        parentId: comment.id,
+        content: parsed.data.content,
+        reviewId: parsed.data.reviewId,
+        postId: parsed.data.postId,
+        complaintId: parsed.data.complaintId,
+        parentId: parsed.data.parentId,
       });
       if (result.error) {
-        console.error('Reply error:', result.error);
+        setReplyError(safeApiMessage(result.error));
+        showToast(safeApiMessage(result.error), "error");
         return;
       }
       if (result.data) {
         setLocalReplies([...localReplies, result.data]);
         setReplyContent("");
+        setReplyError("");
         setShowReplyForm(false);
         if (onCommentAdded) {
           onCommentAdded();
         }
       }
-    } catch (error) {
-      console.error('Error replying:', error);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Something went wrong.";
+      setReplyError(safeApiMessage(msg));
+      showToast(safeApiMessage(msg), "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -234,6 +254,7 @@ function CommentItem({
                   className="reply-textarea"
                   rows={3}
                 />
+                {replyError && <p className="text-xs text-red-500">{replyError}</p>}
                 <div className="flex gap-2">
                   <button
                     type="button"

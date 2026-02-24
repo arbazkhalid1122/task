@@ -8,32 +8,14 @@ import { useState } from "react";
 import StarRating from "./StarRating";
 import { reviewsApi } from "../../lib/api";
 import { getSocket } from "../../lib/socket";
-interface CompanyProfileProps {
-  onReviewSubmitted?: (newReview?: unknown) => void;
-}
+import { createReviewSchema } from "../../lib/validations";
+import { safeApiMessage } from "../../lib/apiErrors";
 
 const MIN_REVIEW_CONTENT_LENGTH = 20;
 
-const normalizeReviewSubmitError = (rawError?: string): string => {
-  const fallback = "An error occurred. Please try again.";
-  if (!rawError) return fallback;
-
-  if (rawError.includes("Review content must be at least 20 characters")) {
-    return "Review content must be at least 20 characters";
-  }
-
-  try {
-    const parsed = JSON.parse(rawError);
-    if (Array.isArray(parsed)) {
-      const firstMessage = parsed.find((item) => typeof item?.message === "string")?.message;
-      if (firstMessage) return firstMessage;
-    }
-  } catch {
-    // Ignore parse failure and continue with string checks
-  }
-
-  return rawError.trim() || fallback;
-};
+interface CompanyProfileProps {
+  onReviewSubmitted?: (newReview?: unknown) => void;
+}
 
 export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProps) {
   const t = useTranslations();
@@ -47,19 +29,17 @@ export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
-    if (!reviewTitle.trim() || !reviewContent.trim()) {
-      setError("Please fill in both title and description");
-      return;
-    }
 
-    if (reviewContent.trim().length < MIN_REVIEW_CONTENT_LENGTH) {
-      setError("Review content must be at least 20 characters");
-      return;
-    }
+    const parsed = createReviewSchema.safeParse({
+      title: reviewTitle,
+      content: reviewContent,
+      overallScore: rating,
+      criteriaScores: { overall: rating },
+    });
 
-    if (rating === 0) {
-      setError("Please select a rating");
+    if (!parsed.success) {
+      const first = parsed.error.issues[0];
+      setError(first?.message ?? "Validation failed");
       return;
     }
 
@@ -67,35 +47,29 @@ export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProp
 
     try {
       const response = await reviewsApi.create({
-        title: reviewTitle,
-        content: reviewContent,
-        overallScore: rating,
-        criteriaScores: {
-          overall: rating
-        }
+        title: parsed.data.title,
+        content: parsed.data.content,
+        overallScore: parsed.data.overallScore,
+        criteriaScores: parsed.data.criteriaScores ?? { overall: parsed.data.overallScore },
       });
 
       if (response.error) {
-        setError(normalizeReviewSubmitError(response.error));
+        setError(safeApiMessage(response.error));
       } else {
-        // Reset form
         setReviewTitle("");
         setReviewContent("");
         setRating(0);
-        // Refresh reviews list
         if (response.data) {
           const socket = getSocket();
           socket?.emit("review:created:client", response.data);
         }
-
         if (onReviewSubmitted) {
           onReviewSubmitted(response.data);
         }
       }
     } catch (caughtError) {
-      const fallback = "An error occurred. Please try again.";
-      const message = caughtError instanceof Error ? caughtError.message : fallback;
-      setError(normalizeReviewSubmitError(message));
+      const raw = caughtError instanceof Error ? caughtError.message : "An error occurred. Please try again.";
+      setError(safeApiMessage(raw));
     } finally {
       setSubmitting(false);
     }

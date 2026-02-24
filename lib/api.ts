@@ -1,11 +1,8 @@
 import type { Comment, Complaint, Review, UserProfile, VoteResponse } from "./types";
+import { getApiBaseUrl } from "./env";
+import { safeApiMessage } from "./apiErrors";
 
-// Client-side API utilities
-// Point to NestJS backend when running API separately (e.g. NEXT_PUBLIC_API_URL=http://localhost:3001)
-const API_BASE =
-  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL
-    ? process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')
-    : '') + '/api';
+const API_BASE = getApiBaseUrl() ? `${getApiBaseUrl()}/api` : "/api";
 
 export interface ApiResponse<T> {
   data?: T;
@@ -77,19 +74,18 @@ async function fetchApi<T>(
       const errorLabel =
         typeof dataRecord?.error === 'string' ? dataRecord.error.trim() : undefined;
       const genericLabels = new Set(['Error', 'Bad Request', 'Unauthorized', 'Forbidden', 'Conflict']);
-      const normalizedError =
+      const rawError =
         message ||
         (errorLabel && !genericLabels.has(errorLabel) ? errorLabel : undefined) ||
         (response.statusText ? `${response.status} ${response.statusText}` : undefined) ||
         fallback;
-      return { error: normalizedError };
+      return { error: safeApiMessage(rawError) };
     }
 
     return { data: data as T };
   } catch (error) {
-    return {
-      error: error instanceof Error ? error.message : 'Network error',
-    };
+    const raw = error instanceof Error ? error.message : 'Network error';
+    return { error: safeApiMessage(raw) };
   }
 }
 

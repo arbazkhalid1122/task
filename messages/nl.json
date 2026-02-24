@@ -39,7 +39,9 @@
       "reply": "Antwoorden",
       "replies": "Antwoorden",
       "writeReply": "Schrijf een antwoord...",
-      "cancel": "Annuleren"
+      "cancel": "Annuleren",
+      "noComments": "Nog geen reacties. Wees de eerste om te reageren!",
+      "loadingComments": "Reacties laden..."
     },
     "cancel": "Annuleren"
   },

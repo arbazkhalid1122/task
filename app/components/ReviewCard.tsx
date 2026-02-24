@@ -87,7 +87,8 @@ export default function ReviewCard({ review, index: _index, onVoteUpdate }: Revi
 
   const translate = (key: string, fallback: string) => {
     try {
-      return t(key as never);
+      const result = t(key as never);
+      return result === key ? fallback : result;
     } catch {
       return fallback;
     }

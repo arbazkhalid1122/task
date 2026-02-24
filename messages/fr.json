@@ -39,7 +39,9 @@
       "reply": "Répondre",
       "replies": "Réponses",
       "writeReply": "Écrire une réponse...",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "noComments": "Pas encore de commentaires. Soyez le premier à commenter !",
+      "loadingComments": "Chargement des commentaires..."
     },
     "cancel": "Annuler"
   },

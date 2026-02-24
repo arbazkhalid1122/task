@@ -1,11 +1,6 @@
 import Credentials from 'next-auth/providers/credentials';
 import type { NextAuthOptions } from 'next-auth';
-
-const backendBaseUrl = (
-  process.env.NEXT_PUBLIC_API_URL ||
-  process.env.API_URL ||
-  'http://localhost:8000'
-).replace(/\/$/, '');
+import { getBackendUrl } from './lib/env';
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -26,7 +21,7 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const response = await fetch(`${backendBaseUrl}/api/auth/login`, {
+        const response = await fetch(`${getBackendUrl()}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),

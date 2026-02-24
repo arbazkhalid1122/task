@@ -39,7 +39,9 @@
       "reply": "Reply",
       "replies": "Replies",
       "writeReply": "Write a reply...",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "noComments": "No comments yet. Be the first to comment!",
+      "loadingComments": "Loading comments..."
     },
     "processing": "Processing...",
     "cancel": "Cancel"
