@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { authApi, complaintsApi, reviewsApi } from "@/lib/api";
+import { useToast } from "@/app/contexts/ToastContext";
 import type { Complaint, Review, UserProfile } from "@/lib/types";
+
+function isAuthFailureMessage(message: string): boolean {
+  return /unauthorized|authentication required/i.test(message);
+}
 
 export function useUserProfileData(username: string) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -10,6 +15,7 @@ export function useUserProfileData(username: string) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
 
   const fetchUserProfile = useCallback(async () => {
     if (!username) return;
@@ -18,6 +24,13 @@ export function useUserProfileData(username: string) {
     try {
       const reviewsResponse = await reviewsApi.list({ limit: 50 });
       const complaintsResponse = await complaintsApi.list({ username, limit: 50 });
+
+      if (reviewsResponse.error) {
+        showToast(reviewsResponse.error, "error");
+      }
+      if (complaintsResponse.error) {
+        showToast(complaintsResponse.error, "error");
+      }
 
       const allReviews = reviewsResponse.data?.reviews ?? [];
       const userReviews = allReviews.filter((review) => review.author?.username === username);
@@ -29,17 +42,22 @@ export function useUserProfileData(username: string) {
       const nextUser = userReviews[0]?.author ?? userComplaints[0]?.author ?? null;
       setUser(nextUser ?? null);
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to load profile.";
       console.error("Error fetching user profile:", error);
+      showToast(message, "error");
     } finally {
       setLoading(false);
     }
-  }, [username]);
+  }, [username, showToast]);
 
   useEffect(() => {
     void authApi.me().then((response) => {
       setIsLoggedIn(Boolean(response.data?.user));
+      if (response.error && !isAuthFailureMessage(response.error)) {
+        showToast(response.error, "error");
+      }
     });
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     void fetchUserProfile();

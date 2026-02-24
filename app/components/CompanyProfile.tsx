@@ -9,6 +9,7 @@ import StarRating from "./StarRating";
 import { reviewsApi } from "../../lib/api";
 import { createReviewSchema } from "../../lib/validations";
 import { safeApiMessage } from "../../lib/apiErrors";
+import { useToast } from "../contexts/ToastContext";
 
 const MIN_REVIEW_CONTENT_LENGTH = 20;
 
@@ -18,6 +19,7 @@ interface CompanyProfileProps {
 
 export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProps) {
   const t = useTranslations();
+  const { showToast } = useToast();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewContent, setReviewContent] = useState("");
@@ -53,7 +55,9 @@ export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProp
       });
 
       if (response.error) {
-        setError(safeApiMessage(response.error));
+        const msg = safeApiMessage(response.error);
+        setError(msg);
+        showToast(msg, "error");
       } else {
         setReviewTitle("");
         setReviewContent("");
@@ -64,7 +68,9 @@ export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProp
       }
     } catch (caughtError) {
       const raw = caughtError instanceof Error ? caughtError.message : "An error occurred. Please try again.";
-      setError(safeApiMessage(raw));
+      const msg = safeApiMessage(raw);
+      setError(msg);
+      showToast(msg, "error");
     } finally {
       setSubmitting(false);
     }

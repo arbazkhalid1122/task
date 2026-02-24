@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { reviewsApi } from "@/lib/api";
 import { useSocket } from "@/lib/socket";
+import { useToast } from "@/app/contexts/ToastContext";
 import type { Review } from "@/lib/types";
 
 interface VoteUpdatePayload {
@@ -15,6 +16,7 @@ export function useReviewsFeed() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const { socket } = useSocket();
+  const { showToast } = useToast();
 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
@@ -22,11 +24,13 @@ export function useReviewsFeed() {
       const response = await reviewsApi.list({ status: "APPROVED", limit: 20 });
       if (response.data?.reviews) {
         setReviews(response.data.reviews);
+      } else if (response.error) {
+        showToast(response.error, "error");
       }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   const updateReviewVote = useCallback((reviewId: string, helpfulCount: number, downVoteCount: number) => {
     setReviews((prevReviews) =>
