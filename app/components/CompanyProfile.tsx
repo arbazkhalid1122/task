@@ -10,6 +10,7 @@ import { reviewsApi } from "../../lib/api";
 import { createReviewSchema } from "../../lib/validations";
 import { safeApiMessage } from "../../lib/apiErrors";
 import { useToast } from "../contexts/ToastContext";
+import { useAuth } from "../contexts/AuthContext";
 
 const MIN_REVIEW_CONTENT_LENGTH = 20;
 
@@ -20,7 +21,7 @@ interface CompanyProfileProps {
 export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProps) {
   const t = useTranslations();
   const { showToast } = useToast();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn } = useAuth();
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewContent, setReviewContent] = useState("");
   const [rating, setRating] = useState(0);
@@ -122,40 +123,42 @@ export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProp
         )}
         <div className="rounded-full bg-bg-white p-2 text-primary w-6 h-6 flex text-xs items-center justify-center flex-shrink-0">X</div>
       </div>
-      <div className="mt-3 card-light p-4">
-        <form onSubmit={handleSubmit}>
-          <div className="flex flex-col sm:flex-row h-auto sm:h-10 items-start sm:items-center border-b border-border-light px-3 py-2 sm:py-0 gap-2 sm:gap-0">
-            <StarRating rating={rating} onRatingChange={setRating} maxRating={10} size={18} />
-            <div className="flex flex-wrap items-center gap-1">
-              <span className="text-sm font-normal leading-[14px] tracking-normal text-text-primary font-inter">
-                {t("companyProfile.howWouldYouRate")} {"  "}
-              </span>
-              <span className="text-sm font-semibold leading-[14px] tracking-normal text-primary">Companyprofile</span>
+      {isLoggedIn && (
+        <div className="mt-3 card-light p-4">
+          <form onSubmit={handleSubmit}>
+            <div className="flex flex-col sm:flex-row h-auto sm:h-10 items-start sm:items-center border-b border-border-light px-3 py-2 sm:py-0 gap-2 sm:gap-0">
+              <StarRating rating={rating} onRatingChange={setRating} maxRating={10} size={18} />
+              <div className="flex flex-wrap items-center gap-1">
+                <span className="text-sm font-normal leading-[14px] tracking-normal text-text-primary font-inter">
+                  {t("companyProfile.howWouldYouRate")} {"  "}
+                </span>
+                <span className="text-sm font-semibold leading-[14px] tracking-normal text-primary">Companyprofile</span>
+              </div>
             </div>
-          </div>
-          <input
-            type="text"
-            placeholder={t("companyProfile.reviewTitle")}
-            value={reviewTitle}
-            onChange={(e) => setReviewTitle(e.target.value)}
-            className="py-3 w-full textarea-field text-base"
-            required
-          />
-          <textarea
-            placeholder={t("companyProfile.reviewContent")}
-            value={reviewContent}
-            onChange={(e) => setReviewContent(e.target.value)}
-            rows={6}
-            minLength={MIN_REVIEW_CONTENT_LENGTH}
-            className="textarea-field mt-3 w-full text-[13px]"
-            required
-          />
-          {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
-          <button type="submit" disabled={submitting} className="btn-submit-review">
-            {submitting ? t("common.auth.processing") : t("companyProfile.submitReview")}
-          </button>
-        </form>
-      </div>
+            <input
+              type="text"
+              placeholder={t("companyProfile.reviewTitle")}
+              value={reviewTitle}
+              onChange={(e) => setReviewTitle(e.target.value)}
+              className="py-3 w-full textarea-field text-base"
+              required
+            />
+            <textarea
+              placeholder={t("companyProfile.reviewContent")}
+              value={reviewContent}
+              onChange={(e) => setReviewContent(e.target.value)}
+              rows={6}
+              minLength={MIN_REVIEW_CONTENT_LENGTH}
+              className="textarea-field mt-3 w-full text-[13px]"
+              required
+            />
+            {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
+            <button type="submit" disabled={submitting} className="btn-submit-review">
+              {submitting ? t("common.auth.processing") : t("companyProfile.submitReview")}
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

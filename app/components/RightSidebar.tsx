@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useTranslations } from 'next-intl';
 import { signIn, useSession } from "next-auth/react";
 import { helpMenuItems, topRatedCards } from "../data/constants";
@@ -12,32 +11,19 @@ import Toast from "./Toast";
 import { authApi } from "../../lib/api";
 import { loginSchema, registerSchema } from "../../lib/validations";
 import { FcGoogle } from "react-icons/fc";
+import { useAuth } from "../contexts/AuthContext";
 
-interface RightSidebarProps {
-  isLoggedIn: boolean;
-}
-
-export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
+export default function RightSidebar() {
   const t = useTranslations();
-  const router = useRouter();
   const { status } = useSession();
+  const { isLoggedIn, refreshAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignup, setIsSignup] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [hasAuthenticated, setHasAuthenticated] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isAuthenticated = isLoggedIn || hasAuthenticated || status === "authenticated";
-
-  useEffect(() => {
-    return () => {
-      if (refreshTimeoutRef.current) {
-        clearTimeout(refreshTimeoutRef.current);
-      }
-    };
-  }, []);
+  const isAuthenticated = isLoggedIn || status === "authenticated";
 
   const helpMenuTranslations = [
     `${t('sidebar.readMessages')} (29)`,
@@ -49,11 +35,7 @@ export default function RightSidebar({ isLoggedIn }: RightSidebarProps) {
 
   const completeAuthentication = (message: string) => {
     setToast({ message, type: "success" });
-    setHasAuthenticated(true);
-    // Session cookie is set by the backend, refresh to reflect login state.
-    refreshTimeoutRef.current = setTimeout(() => {
-      router.refresh();
-    }, 1000);
+    void refreshAuth();
   };
 
   const signInWithCredentials = async () => {

@@ -1,13 +1,11 @@
 "use client";
 
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/app/contexts/AuthContext';
 
-interface HeaderProps {
-  isLoggedIn: boolean;
-}
-
-export default function Header({ isLoggedIn }: HeaderProps) {
+export default function Header() {
   const t = useTranslations();
+  const { isLoggedIn } = useAuth();
 
   return (
     <header className="w-full border-b border-border">

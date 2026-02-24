@@ -15,12 +15,12 @@ export default function UserProfile() {
   const params = useParams();
   const username = params?.username as string;
   const [activeTab, setActiveTab] = useState<'reviews' | 'complaints'>('reviews');
-  const { isLoggedIn, user, reviews, complaints, loading, updateReviewVote, updateComplaintVote } =
+  const { user, reviews, complaints, loading, updateReviewVote, updateComplaintVote } =
     useUserProfileData(username);
 
   return (
     <div className="bg-bg-white text-foreground">
-      <Header isLoggedIn={isLoggedIn} />
+      <Header />
       <div className="page-container">
         <div className="page-main-wrap">
           <main className="main-grid">
@@ -100,7 +100,7 @@ export default function UserProfile() {
               )}
             </section>
 
-            <RightSidebar isLoggedIn={isLoggedIn} />
+            <RightSidebar />
           </main>
         </div>
       </div>
