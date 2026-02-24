@@ -7,7 +7,6 @@ import { companyProfile } from "../data/constants";
 import { useState } from "react";
 import StarRating from "./StarRating";
 import { reviewsApi } from "../../lib/api";
-import { getSocket } from "../../lib/socket";
 import { createReviewSchema } from "../../lib/validations";
 import { safeApiMessage } from "../../lib/apiErrors";
 
@@ -59,10 +58,6 @@ export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProp
         setReviewTitle("");
         setReviewContent("");
         setRating(0);
-        if (response.data) {
-          const socket = getSocket();
-          socket?.emit("review:created:client", response.data);
-        }
         if (onReviewSubmitted) {
           onReviewSubmitted(response.data);
         }
@@ -158,4 +153,3 @@ export default function CompanyProfile({ onReviewSubmitted }: CompanyProfileProp
     </div>
   );
 }
-
