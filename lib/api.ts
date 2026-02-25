@@ -265,7 +265,22 @@ export const trendingApi = {
     if (params?.limit) query.set('limit', params.limit.toString());
 
     return fetchApi<{
-      trending: Array<{ id: string; score: number; type: "review" | "company" | "user" }>;
+      trendingNow: Array<{
+        id: string;
+        name: string;
+        description: string;
+        likes: number;
+        averageScore: number;
+        reviewCount: number;
+      }>;
+      topRatedThisWeek: Array<{
+        id: string;
+        name: string;
+        description: string;
+        likes: number;
+        averageScore: number;
+        reviewCount: number;
+      }>;
     }>(`/trending?${query.toString()}`);
   },
 };

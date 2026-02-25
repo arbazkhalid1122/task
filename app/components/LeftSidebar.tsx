@@ -1,15 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from 'next-intl';
 import { alerts, sidebarMenuItems, languageItems } from "../data/constants";
 import AlertCard from "./AlertCard";
 import SidebarMenuItem from "./SidebarMenuItem";
 import Separator from "./Separator";
+import { trendingApi } from "../../lib/api";
+import { truncateWithEllipsis } from "../utils/textUtils";
 
 export default function LeftSidebar() {
   const t = useTranslations();
   const [activeItem, setActiveItem] = useState<string | null>(null);
+  const [sidebarAlerts, setSidebarAlerts] = useState(() =>
+    alerts.map((item) =>
+      item.type === "trending"
+        ? {
+            ...item,
+            content: "",
+          }
+        : item
+    )
+  );
 
   const sidebarMenuTranslations: Record<string, string> = {
     "Exchanges": t('sidebar.exchanges'),
@@ -23,9 +35,55 @@ export default function LeftSidebar() {
     "NFT": t('sidebar.nft'),
   };
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadTrending = async () => {
+      const response = await trendingApi.get({ period: 'week', limit: 1 });
+      if (!isMounted) {
+        return;
+      }
+      if (response.error || !response.data?.trendingNow?.length) {
+        setSidebarAlerts((prev) =>
+          prev.map((item) =>
+            item.type === "trending"
+              ? {
+                  ...item,
+                  content: "",
+                }
+              : item
+          )
+        );
+        return;
+      }
+
+      const trendingItem = response.data.trendingNow[0];
+      setSidebarAlerts((prev) =>
+        prev.map((item) =>
+          item.type === "trending"
+            ? {
+                ...item,
+                content: truncateWithEllipsis(trendingItem.name, 42),
+              }
+            : item
+        )
+      );
+    };
+
+    void loadTrending();
+    const intervalId = setInterval(() => {
+      void loadTrending();
+    }, 20000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, []);
+
   return (
     <aside className="sidebar-left sidebar-border-right">
-      {alerts.map((alert, index) => (
+      {sidebarAlerts.map((alert, index) => (
         <AlertCard key={alert.type} alert={alert} index={index} />
       ))}
       {sidebarMenuItems.map((item) => (
@@ -48,4 +106,3 @@ export default function LeftSidebar() {
     </aside>
   );
 }
-

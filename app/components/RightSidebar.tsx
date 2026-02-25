@@ -1,17 +1,35 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from 'next-intl';
 import { signIn, useSession } from "next-auth/react";
-import { helpMenuItems, topRatedCards } from "../data/constants";
+import { helpMenuItems } from "../data/constants";
 import Separator from "./Separator";
 import TopRatedCard from "./TopRatedCard";
 import Toast from "./Toast";
-import { authApi } from "../../lib/api";
+import { authApi, trendingApi } from "../../lib/api";
 import { loginSchema, registerSchema } from "../../lib/validations";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "../contexts/AuthContext";
+import { truncateWithEllipsis } from "../utils/textUtils";
+
+type TopRatedCardData = {
+  title: string;
+  product: {
+    name: string;
+    score: string;
+    reviews: string;
+    companies: string;
+    badge: { text: string; color: string };
+    description: string;
+    bgColor: string;
+    textColor: string;
+    scoreColor: string;
+    separatorColor: string;
+    hasVerify?: boolean;
+  };
+};
 
 export default function RightSidebar() {
   const t = useTranslations();
@@ -23,6 +41,7 @@ export default function RightSidebar() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [dynamicTopRatedCards, setDynamicTopRatedCards] = useState<TopRatedCardData[]>([]);
   const isAuthenticated = isLoggedIn || status === "authenticated";
 
   const helpMenuTranslations = [
@@ -130,6 +149,52 @@ export default function RightSidebar() {
     setError("");
   };
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadTopRated = async () => {
+      const response = await trendingApi.get({ period: 'week', limit: 2 });
+      if (!isMounted) {
+        return;
+      }
+      if (response.error || !response.data?.topRatedThisWeek?.length) {
+        setDynamicTopRatedCards([]);
+        return;
+      }
+
+      const cards = response.data.topRatedThisWeek.slice(0, 2).map((item, index) => ({
+        title: "Top rated this week",
+        product: {
+          name: truncateWithEllipsis(item.name, 26),
+          score: `${item.averageScore.toFixed(1)}/10`,
+          reviews: `${item.reviewCount} Reviews`,
+          companies: "1",
+          badge: index === 0
+            ? { text: "Rising", color: "bg-accent-blue" }
+            : { text: "New", color: "bg-alert-orange-light" },
+          description: truncateWithEllipsis(item.description || item.name, 92),
+          bgColor: index === 0 ? "bg-dark-card" : "bg-card-purple-light-bg",
+          textColor: index === 0 ? "text-white" : "text-text-dark",
+          scoreColor: index === 0 ? "text-emerald" : "text-primary-light",
+          separatorColor: index === 0 ? "bg-border-gray" : "bg-card-purple-light-border",
+          hasVerify: index === 1,
+        },
+      }));
+
+      setDynamicTopRatedCards(cards);
+    };
+
+    void loadTopRated();
+    const intervalId = setInterval(() => {
+      void loadTopRated();
+    }, 20000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, []);
+
   return (
     <>
       {toast && (
@@ -225,8 +290,8 @@ export default function RightSidebar() {
 
 
 
-      {topRatedCards.map((card, index) => (
-        <TopRatedCard key={`${card.title}-${card.product.name}`} card={card} index={index} />
+      {dynamicTopRatedCards.map((card, index) => (
+        <TopRatedCard key={`${card.title}-${card.product.name}-${index}`} card={card} index={index} />
       ))}
     </aside>
     </>
