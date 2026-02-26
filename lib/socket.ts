@@ -1,6 +1,4 @@
-// Client-side Socket.IO setup
-// In production (e.g. Vercel), set NEXT_PUBLIC_SOCKET_URL to your backend URL
-// so the client connects to the backend's Socket.IO server.
+// Client-side Socket.IO – connects to backend (e.g. Railway). Set NEXT_PUBLIC_SOCKET_URL to backend URL.
 'use client';
 
 import { io, Socket } from 'socket.io-client';
