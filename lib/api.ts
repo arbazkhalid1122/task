@@ -3,6 +3,30 @@ import { getApiBaseUrl } from "./env";
 import { safeApiMessage } from "./apiErrors";
 
 const API_BASE = getApiBaseUrl() ? `${getApiBaseUrl()}/api` : "/api";
+const AUTH_TOKEN_STORAGE_KEY = "cryptoi_session_token";
+
+function getStoredAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const token = window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+    return token && token.trim() ? token.trim() : null;
+  } catch {
+    return null;
+  }
+}
+
+function storeAuthToken(token?: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (!token || !token.trim()) {
+      window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+      return;
+    }
+    window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token.trim());
+  } catch {
+    // Ignore storage failures; cookie-based auth can still work.
+  }
+}
 
 export interface ApiResponse<T> {
   data?: T;
@@ -32,6 +56,12 @@ async function fetchApi<T>(
 ): Promise<ApiResponse<T>> {
   try {
     const headers = new Headers(options?.headers);
+    if (!headers.has("Authorization")) {
+      const token = getStoredAuthToken();
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+    }
     if (options?.body && !headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
     }
@@ -97,23 +127,33 @@ export const authApi = {
     password: string;
     name?: string;
   }) => {
-    return fetchApi<{ user: UserProfile; message: string }>('/auth/register', {
+    const response = await fetchApi<{ user: UserProfile; token?: string; message: string }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    if (response.data?.token) {
+      storeAuthToken(response.data.token);
+    }
+    return response;
   },
 
   login: async (data: { email: string; password: string }) => {
-    return fetchApi<{ user: UserProfile; message: string }>('/auth/login', {
+    const response = await fetchApi<{ user: UserProfile; token?: string; message: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    if (response.data?.token) {
+      storeAuthToken(response.data.token);
+    }
+    return response;
   },
 
   logout: async () => {
-    return fetchApi('/auth/logout', {
+    const response = await fetchApi('/auth/logout', {
       method: 'POST',
     });
+    storeAuthToken(undefined);
+    return response;
   },
 
   me: async () => {
