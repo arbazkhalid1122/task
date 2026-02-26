@@ -4,25 +4,53 @@ import { safeApiMessage } from "./apiErrors";
 
 const API_BASE = getApiBaseUrl() ? `${getApiBaseUrl()}/api` : "/api";
 const AUTH_TOKEN_STORAGE_KEY = "cryptoi_session_token";
+const LEGACY_AUTH_TOKEN_STORAGE_KEYS = ["token", "authToken", "backendToken"] as const;
+
+function normalizeAuthToken(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  let token = raw.trim();
+  if (!token) return null;
+
+  if (
+    (token.startsWith('"') && token.endsWith('"')) ||
+    (token.startsWith("'") && token.endsWith("'"))
+  ) {
+    token = token.slice(1, -1).trim();
+  }
+
+  if (/^bearer\s+/i.test(token)) {
+    token = token.replace(/^bearer\s+/i, "").trim();
+  }
+
+  return token || null;
+}
 
 function getStoredAuthToken(): string | null {
   if (typeof window === "undefined") return null;
   try {
-    const token = window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
-    return token && token.trim() ? token.trim() : null;
+    const primary = normalizeAuthToken(window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY));
+    if (primary) return primary;
+
+    for (const key of LEGACY_AUTH_TOKEN_STORAGE_KEYS) {
+      const token = normalizeAuthToken(window.localStorage.getItem(key));
+      if (token) return token;
+    }
+
+    return null;
   } catch {
     return null;
   }
 }
 
-function storeAuthToken(token?: string): void {
+export function setApiAuthToken(token?: string): void {
   if (typeof window === "undefined") return;
   try {
-    if (!token || !token.trim()) {
+    const normalized = normalizeAuthToken(token);
+    if (!normalized) {
       window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
       return;
     }
-    window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token.trim());
+    window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, normalized);
   } catch {
     // Ignore storage failures; cookie-based auth can still work.
   }
@@ -132,7 +160,7 @@ export const authApi = {
       body: JSON.stringify(data),
     });
     if (response.data?.token) {
-      storeAuthToken(response.data.token);
+      setApiAuthToken(response.data.token);
     }
     return response;
   },
@@ -143,7 +171,7 @@ export const authApi = {
       body: JSON.stringify(data),
     });
     if (response.data?.token) {
-      storeAuthToken(response.data.token);
+      setApiAuthToken(response.data.token);
     }
     return response;
   },
@@ -152,7 +180,7 @@ export const authApi = {
     const response = await fetchApi('/auth/logout', {
       method: 'POST',
     });
-    storeAuthToken(undefined);
+    setApiAuthToken(undefined);
     return response;
   },
 

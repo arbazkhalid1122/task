@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { authApi } from "@/lib/api";
+import { authApi, setApiAuthToken } from "@/lib/api";
 import { useToast } from "@/app/contexts/ToastContext";
 import type { UserProfile } from "@/lib/types";
 
@@ -31,6 +31,12 @@ function sessionUserToProfile(sessionUser: {
     bio: sessionUser.bio ?? undefined,
     reputation: sessionUser.reputation ?? 0,
   };
+}
+
+function getSessionBackendToken(sessionUser: unknown): string | undefined {
+  if (!sessionUser || typeof sessionUser !== "object") return undefined;
+  const token = (sessionUser as { backendToken?: unknown }).backendToken;
+  return typeof token === "string" && token.trim() ? token.trim() : undefined;
 }
 
 interface AuthContextValue {
@@ -71,12 +77,14 @@ export function AuthProvider({
   // Sync with NextAuth session (primary source when user logs in via NextAuth)
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
+      setApiAuthToken(getSessionBackendToken(session.user));
       const profile = sessionUserToProfile(session.user as Parameters<typeof sessionUserToProfile>[0]);
       setIsLoggedIn(true);
       setUser(profile ?? null);
       return;
     }
     if (status === "unauthenticated") {
+      setApiAuthToken(undefined);
       setIsLoggedIn(false);
       setUser(null);
     }
