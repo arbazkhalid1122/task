@@ -6,7 +6,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 export default function Header() {
   const t = useTranslations();
   const { isLoggedIn } = useAuth();
-
+console.log(isLoggedIn);
   return (
     <header className="w-full border-b border-border">
       <div className="header-inner">
