@@ -6,23 +6,8 @@ import { useEffect, useState, useRef } from 'react';
 
 let socketInstance: Socket | null = null;
 
-/**
- * On Vercel (and similar serverless hosts), the app is served without your custom server,
- * so no Socket.IO server runs. Skip connecting when the app is served from Vercel to
- * avoid repeated WebSocket connection errors.
- */
-function shouldSkipSocketConnection(): boolean {
-  if (typeof window === 'undefined') return true;
-  const hostname = window.location.hostname || '';
-  return hostname.endsWith('.vercel.app') || hostname === 'vercel.app';
-}
-
 export function getSocket(): Socket | null {
   if (typeof window === 'undefined') {
-    return null;
-  }
-
-  if (shouldSkipSocketConnection()) {
     return null;
   }
 
