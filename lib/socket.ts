@@ -14,7 +14,6 @@ export function getSocket(): Socket | null {
   if (!socketInstance) {
     const socketUrl =
       process.env.NEXT_PUBLIC_SOCKET_URL ||
-      process.env.NEXT_PUBLIC_API_URL ||
       window.location.origin;
     console.log('🔌 Initializing socket connection to:', socketUrl);
     socketInstance = io(socketUrl, {
