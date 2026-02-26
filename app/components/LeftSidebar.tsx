@@ -71,13 +71,9 @@ export default function LeftSidebar() {
     };
 
     void loadTrending();
-    const intervalId = setInterval(() => {
-      void loadTrending();
-    }, 20000);
 
     return () => {
       isMounted = false;
-      clearInterval(intervalId);
     };
   }, []);
 

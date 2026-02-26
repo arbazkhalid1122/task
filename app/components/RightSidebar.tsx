@@ -185,13 +185,9 @@ export default function RightSidebar() {
     };
 
     void loadTopRated();
-    const intervalId = setInterval(() => {
-      void loadTopRated();
-    }, 20000);
 
     return () => {
       isMounted = false;
-      clearInterval(intervalId);
     };
   }, []);
 
