@@ -1,41 +1,52 @@
 "use client";
 
+import Script from "next/script";
 import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
+const PLAUSIBLE_SCRIPT_SRC = process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_SRC ?? "https://plausible.io/js/script.js";
+
+declare global {
+  interface Window {
+    plausible?: (eventName: string, options?: { props?: Record<string, string>; u?: string }) => void;
+  }
+}
 
 export default function PlausibleTracker() {
-  const initialized = useRef(false);
+  const hasSeenFirstRoute = useRef(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (initialized.current) return;
     if (!PLAUSIBLE_DOMAIN) {
       if (process.env.NODE_ENV === "development") {
-        // eslint-disable-next-line no-console
         console.warn("PlausibleTracker: NEXT_PUBLIC_PLAUSIBLE_DOMAIN is not set; tracker not initialized.");
       }
       return;
     }
 
-    void import("@plausible-analytics/tracker").then(({ init }) => {
-      init({
-        domain: PLAUSIBLE_DOMAIN,
-        hashBasedRouting: false,
-      });
-      initialized.current = true;
-    });
-  }, []);
+    // The Plausible script tracks the initial page load. For SPA route transitions,
+    // trigger additional pageview events after the first route has rendered.
+    if (!hasSeenFirstRoute.current) {
+      hasSeenFirstRoute.current = true;
+      return;
+    }
 
-  // Re-run effect on route changes so Plausible can auto-capture SPA pageviews.
-  useEffect(() => {
-    if (!initialized.current) return;
-    // No manual track call needed: the Plausible tracker auto-captures pageviews in SPAs.
+    const query = searchParams.toString();
+    const url = `${window.location.origin}${pathname}${query ? `?${query}` : ""}`;
+    window.plausible?.("pageview", { u: url });
   }, [pathname, searchParams]);
 
-  return null;
-}
+  if (!PLAUSIBLE_DOMAIN) return null;
 
+  return (
+    <Script
+      defer
+      data-domain={PLAUSIBLE_DOMAIN}
+      src={PLAUSIBLE_SCRIPT_SRC}
+      strategy="afterInteractive"
+    />
+  );
+}
