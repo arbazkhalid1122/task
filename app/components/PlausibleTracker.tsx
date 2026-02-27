@@ -4,8 +4,8 @@ import Script from "next/script";
 import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
-const PLAUSIBLE_SCRIPT_SRC = process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_SRC ?? "https://plausible.io/js/script.js";
+const PLAUSIBLE_SCRIPT_SRC =
+  process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_SRC ?? "https://plausible.io/js/pa-EAVyHTsweqBrpuInh7zNJ.js";
 
 declare global {
   interface Window {
@@ -20,12 +20,6 @@ export default function PlausibleTracker() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!PLAUSIBLE_DOMAIN) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("PlausibleTracker: NEXT_PUBLIC_PLAUSIBLE_DOMAIN is not set; tracker not initialized.");
-      }
-      return;
-    }
 
     // The Plausible script tracks the initial page load. For SPA route transitions,
     // trigger additional pageview events after the first route has rendered.
@@ -39,14 +33,17 @@ export default function PlausibleTracker() {
     window.plausible?.("pageview", { u: url });
   }, [pathname, searchParams]);
 
-  if (!PLAUSIBLE_DOMAIN) return null;
-
   return (
-    <Script
-      defer
-      data-domain={PLAUSIBLE_DOMAIN}
-      src={PLAUSIBLE_SCRIPT_SRC}
-      strategy="afterInteractive"
-    />
+    <>
+      <Script async src={PLAUSIBLE_SCRIPT_SRC} strategy="afterInteractive" />
+      <Script
+        id="plausible-init"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html:
+            "window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)};plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init();",
+        }}
+      />
+    </>
   );
 }
