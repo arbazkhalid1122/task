@@ -3,57 +3,10 @@ import { getApiBaseUrl } from "./env";
 import { safeApiMessage } from "./apiErrors";
 
 const API_BASE = getApiBaseUrl() ? `${getApiBaseUrl()}/api` : "/api";
-const AUTH_TOKEN_STORAGE_KEY = "cryptoi_session_token";
-const LEGACY_AUTH_TOKEN_STORAGE_KEYS = ["token", "authToken", "backendToken"] as const;
 
-function normalizeAuthToken(raw: string | null | undefined): string | null {
-  if (!raw) return null;
-  let token = raw.trim();
-  if (!token) return null;
-
-  if (
-    (token.startsWith('"') && token.endsWith('"')) ||
-    (token.startsWith("'") && token.endsWith("'"))
-  ) {
-    token = token.slice(1, -1).trim();
-  }
-
-  if (/^bearer\s+/i.test(token)) {
-    token = token.replace(/^bearer\s+/i, "").trim();
-  }
-
-  return token || null;
-}
-
-function getStoredAuthToken(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const primary = normalizeAuthToken(window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY));
-    if (primary) return primary;
-
-    for (const key of LEGACY_AUTH_TOKEN_STORAGE_KEYS) {
-      const token = normalizeAuthToken(window.localStorage.getItem(key));
-      if (token) return token;
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
-
+// Auth is cookie-based; intentionally no-op to avoid token persistence in browser storage.
 export function setApiAuthToken(token?: string): void {
-  if (typeof window === "undefined") return;
-  try {
-    const normalized = normalizeAuthToken(token);
-    if (!normalized) {
-      window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
-      return;
-    }
-    window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, normalized);
-  } catch {
-    // Ignore storage failures; cookie-based auth can still work.
-  }
+  void token;
 }
 
 export interface ApiResponse<T> {
@@ -84,12 +37,6 @@ async function fetchApi<T>(
 ): Promise<ApiResponse<T>> {
   try {
     const headers = new Headers(options?.headers);
-    if (!headers.has("Authorization")) {
-      const token = getStoredAuthToken();
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-    }
     if (options?.body && !headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
     }
@@ -155,33 +102,23 @@ export const authApi = {
     password: string;
     name?: string;
   }) => {
-    const response = await fetchApi<{ user: UserProfile; token?: string; message: string }>('/auth/register', {
+    return fetchApi<{ user: UserProfile; message: string }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    if (response.data?.token) {
-      setApiAuthToken(response.data.token);
-    }
-    return response;
   },
 
   login: async (data: { email: string; password: string }) => {
-    const response = await fetchApi<{ user: UserProfile; token?: string; message: string }>('/auth/login', {
+    return fetchApi<{ user: UserProfile; message: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    if (response.data?.token) {
-      setApiAuthToken(response.data.token);
-    }
-    return response;
   },
 
   logout: async () => {
-    const response = await fetchApi('/auth/logout', {
+    return fetchApi('/auth/logout', {
       method: 'POST',
     });
-    setApiAuthToken(undefined);
-    return response;
   },
 
   me: async () => {

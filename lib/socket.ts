@@ -2,7 +2,7 @@
 'use client';
 
 import { io, Socket } from 'socket.io-client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 let socketInstance: Socket | null = null;
 
@@ -62,27 +62,19 @@ export function getSocket(): Socket | null {
 }
 
 export function useSocket() {
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const socketRef = useRef<Socket | null>(null);
+  const [socket] = useState<Socket | null>(() =>
+    typeof window === 'undefined' ? null : getSocket(),
+  );
+  const [isConnected, setIsConnected] = useState(socket?.connected ?? false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (!socket) {
       return;
     }
-
-    const socketInstance = getSocket();
-    if (!socketInstance) {
-      return;
-    }
-
-    socketRef.current = socketInstance;
-    setSocket(socketInstance);
-    setIsConnected(socketInstance.connected);
 
     // Update connection state
     const handleConnect = () => {
-      console.log('✅ useSocket: Socket connected, ID:', socketInstance?.id);
+      console.log('✅ useSocket: Socket connected, ID:', socket?.id);
       setIsConnected(true);
     };
 
@@ -91,21 +83,14 @@ export function useSocket() {
       setIsConnected(false);
     };
 
-    socketInstance.on('connect', handleConnect);
-    socketInstance.on('disconnect', handleDisconnect);
-
-    // If already connected, set state immediately
-    if (socketInstance.connected) {
-      setIsConnected(true);
-    }
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
 
     return () => {
-      if (socketRef.current) {
-        socketRef.current.off('connect', handleConnect);
-        socketRef.current.off('disconnect', handleDisconnect);
-      }
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
     };
-  }, []);
+  }, [socket]);
 
   return { socket, isConnected };
 }

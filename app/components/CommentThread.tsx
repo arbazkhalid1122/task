@@ -51,8 +51,6 @@ export default function CommentThread({
   onVoteUpdate,
   maxDepth = 5 
 }: CommentThreadProps) {
-  const t = useTranslations();
-
   return (
     <div className="space-y-4">
       {comments.map((comment) => (
@@ -298,4 +296,3 @@ function CommentItem({
     </div>
   );
 }
-

@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
-import { authApi, setApiAuthToken } from "@/lib/api";
+import { authApi } from "@/lib/api";
 import { useToast } from "@/app/contexts/ToastContext";
 import type { UserProfile } from "@/lib/types";
 
@@ -33,12 +33,6 @@ function sessionUserToProfile(sessionUser: {
   };
 }
 
-function getSessionBackendToken(sessionUser: unknown): string | undefined {
-  if (!sessionUser || typeof sessionUser !== "object") return undefined;
-  const token = (sessionUser as { backendToken?: unknown }).backendToken;
-  return typeof token === "string" && token.trim() ? token.trim() : undefined;
-}
-
 interface AuthContextValue {
   isLoggedIn: boolean;
   user: UserProfile | null;
@@ -60,54 +54,62 @@ export function AuthProvider({
   initialAuth?: InitialAuth | null;
 }) {
   const { data: session, status } = useSession();
-  const [isLoggedIn, setIsLoggedIn] = useState(initialAuth?.isLoggedIn ?? false);
-  const [user, setUser] = useState<UserProfile | null>(initialAuth?.user ?? null);
+  const [fallbackAuth, setFallbackAuth] = useState<InitialAuth | null>(initialAuth ?? null);
   const { showToast } = useToast();
 
   const refreshAuth = useCallback(async () => {
     const response = await authApi.me();
-    const loggedIn = !!response.data?.user;
-    setIsLoggedIn(loggedIn);
-    setUser(response.data?.user ?? null);
+    setFallbackAuth({
+      isLoggedIn: !!response.data?.user,
+      user: response.data?.user ?? null,
+    });
     if (response.error && !isAuthFailureMessage(response.error)) {
       showToast(response.error, "error");
     }
   }, [showToast]);
 
-  // Sync with NextAuth session (primary source when user logs in via NextAuth)
+  // When no initialAuth is available, fetch backend cookie auth once after NextAuth resolves unauthenticated.
   useEffect(() => {
+    if (initialAuth == null && status === "unauthenticated" && fallbackAuth == null) {
+      void (async () => {
+        const response = await authApi.me();
+        setFallbackAuth({
+          isLoggedIn: !!response.data?.user,
+          user: response.data?.user ?? null,
+        });
+        if (response.error && !isAuthFailureMessage(response.error)) {
+          showToast(response.error, "error");
+        }
+      })();
+    }
+  }, [initialAuth, status, fallbackAuth, showToast]);
+
+  const resolvedAuth = useMemo(() => {
     if (status === "authenticated" && session?.user) {
-      setApiAuthToken(getSessionBackendToken(session.user));
-      const profile = sessionUserToProfile(session.user as Parameters<typeof sessionUserToProfile>[0]);
-      setIsLoggedIn(true);
-      setUser(profile ?? null);
-      return;
+      const profile = sessionUserToProfile(
+        session.user as Parameters<typeof sessionUserToProfile>[0]
+      );
+      return {
+        isLoggedIn: true,
+        user: profile ?? null,
+      };
     }
-    if (status === "unauthenticated") {
-      setApiAuthToken(undefined);
-      setIsLoggedIn(false);
-      setUser(null);
-    }
-    // when status === "loading", keep current state
-  }, [status, session?.user]);
 
-  // Optional: when we have no NextAuth session but had initialAuth from server (backend cookie), keep it
-  useEffect(() => {
-    if (initialAuth != null && status !== "authenticated") {
-      setIsLoggedIn(initialAuth.isLoggedIn);
-      setUser(initialAuth.user ?? null);
+    if (fallbackAuth) {
+      return fallbackAuth;
     }
-  }, [initialAuth?.isLoggedIn, initialAuth?.user, status]);
 
-  // Fallback: if no initialAuth, try backend /me once (e.g. if backend cookie exists)
-  useEffect(() => {
-    if (initialAuth == null && status === "unauthenticated") {
-      void refreshAuth();
-    }
-  }, [initialAuth, status, refreshAuth]);
+    return { isLoggedIn: false, user: null };
+  }, [status, session?.user, fallbackAuth]);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, refreshAuth }}>
+    <AuthContext.Provider
+      value={{
+        isLoggedIn: resolvedAuth.isLoggedIn,
+        user: resolvedAuth.user,
+        refreshAuth,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

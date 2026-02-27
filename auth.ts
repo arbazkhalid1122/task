@@ -44,7 +44,6 @@ export const authOptions: NextAuthOptions = {
             verified?: boolean;
             reputation?: number;
           };
-          token?: string;
         };
 
         if (!payload.user) {
@@ -60,7 +59,6 @@ export const authOptions: NextAuthOptions = {
           avatar: payload.user.avatar ?? null,
           verified: payload.user.verified ?? false,
           reputation: payload.user.reputation ?? 0,
-          backendToken: payload.token ?? null,
         };
       },
     }),
@@ -69,20 +67,12 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.user = user as typeof token.user;
-        const backendToken = (user as { backendToken?: string | null }).backendToken;
-        if (backendToken) {
-          (token as { backendToken?: string }).backendToken = backendToken;
-        }
       }
       return token;
     },
     async session({ session, token }) {
       if (token.user) {
-        const backendToken = (token as { backendToken?: string }).backendToken;
-        session.user = {
-          ...(token.user as typeof session.user),
-          ...(backendToken ? ({ backendToken } as object) : {}),
-        } as typeof session.user;
+        session.user = token.user as typeof session.user;
       }
       return session;
     },
