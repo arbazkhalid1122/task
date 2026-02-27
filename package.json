@@ -13,6 +13,7 @@
     "db:studio": "node scripts/setup-env.js && prisma studio --schema=./backend/prisma/schema.prisma"
   },
   "dependencies": {
+    "@plausible-analytics/tracker": "^0.4.4",
     "@prisma/client": "^5.19.0",
     "bcryptjs": "^2.4.3",
     "date-fns": "^3.6.0",
