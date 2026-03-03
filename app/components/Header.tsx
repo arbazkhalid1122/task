@@ -2,11 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/app/contexts/AuthContext';
+import { trackAnalyticsEvent } from '@/app/components/AnalyticsTracker';
 
 export default function Header() {
   const t = useTranslations();
   const { isLoggedIn } = useAuth();
-console.log(isLoggedIn);
   return (
     <header className="w-full border-b border-border">
       <div className="header-inner">
@@ -24,7 +24,13 @@ console.log(isLoggedIn);
           </div>
         ) : (
           <div className="hidden items-center gap-3 text-xs text-text-tertiary lg:flex font-inter">
-            <button type="button" className="px-5 py-3 btn-primary">{t("common.auth.signup")}</button>
+            <button
+              type="button"
+              className="px-5 py-3 btn-primary"
+              onClick={() => trackAnalyticsEvent("signup_started")}
+            >
+              {t("common.auth.signup")}
+            </button>
             <button type="button" className="btn-login-outline">{t("common.auth.login")}</button>
           </div>
         )}

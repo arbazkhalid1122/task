@@ -10,6 +10,7 @@ import TopRatedCard from "./TopRatedCard";
 import Toast from "./Toast";
 import { authApi, trendingApi } from "../../lib/api";
 import { loginSchema, registerSchema } from "../../lib/validations";
+import { trackAnalyticsEvent } from "./AnalyticsTracker";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "../contexts/AuthContext";
 import { truncateWithEllipsis } from "../utils/textUtils";
@@ -109,6 +110,7 @@ export default function RightSidebar() {
         }
 
         if (await signInWithCredentials()) {
+          trackAnalyticsEvent("signup_completed");
           completeAuthentication("Account created successfully!");
         }
 
