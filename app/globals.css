@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@fontsource/space-grotesk/500.css";
 
 :root {
   --background: #ffffff;
@@ -460,7 +461,7 @@ body {
 
 .header-brand {
   @apply text-2xl sm:text-3xl font-medium text-primary w-full sm:w-auto text-center sm:text-left;
-  font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  font-family: "Space Grotesk", var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif !important;
 }
 
 .header-search {
