@@ -109,7 +109,8 @@
     "title": "Meldingen",
     "markAllRead": "Alles als gelezen markeren",
     "loading": "Laden…",
-    "empty": "Nog geen meldingen"
+    "empty": "Nog geen meldingen",
+    "redirecting": "Doorverwijzen…"
   },
   "profile": {
     "editTitle": "Profiel bewerken",

@@ -18,10 +18,13 @@ export function useHeaderSearch() {
   const [searchOpen, setSearchOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement | null>(null);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestRequestIdRef = useRef(0);
 
   const clearSearch = useCallback(() => {
+    latestRequestIdRef.current += 1;
     setSearchQuery("");
     setSearchResults(EMPTY_RESULTS);
+    setSearchLoading(false);
     setSearchOpen(false);
   }, []);
 
@@ -29,23 +32,37 @@ export function useHeaderSearch() {
     const term = query.trim();
     if (!term) {
       setSearchResults(EMPTY_RESULTS);
+      setSearchLoading(false);
       setSearchOpen(false);
       return;
     }
 
+    const requestId = latestRequestIdRef.current + 1;
+    latestRequestIdRef.current = requestId;
     setSearchLoading(true);
     setSearchOpen(true);
+
     try {
       const response = await searchApi.search({ q: term, type: "all", limit: 10 });
+      if (latestRequestIdRef.current !== requestId) {
+        return;
+      }
+
       const results = response.data?.results;
       setSearchResults({
         reviews: results?.reviews ?? [],
         users: results?.users ?? [],
       });
     } catch {
+      if (latestRequestIdRef.current !== requestId) {
+        return;
+      }
+
       setSearchResults(EMPTY_RESULTS);
     } finally {
-      setSearchLoading(false);
+      if (latestRequestIdRef.current === requestId) {
+        setSearchLoading(false);
+      }
     }
   }, []);
 
@@ -55,7 +72,9 @@ export function useHeaderSearch() {
     }
 
     if (!searchQuery.trim()) {
+      latestRequestIdRef.current += 1;
       setSearchResults(EMPTY_RESULTS);
+      setSearchLoading(false);
       setSearchOpen(false);
       return;
     }

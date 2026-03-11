@@ -68,8 +68,8 @@
     "readMessages": "Read Messages",
     "editProfile": "Edit Profile",
     "changePassword": "Change Password",
-    "fileComplaint": "File An Complaint",
-    "writeSupportTicket": "Write An Support Ticket"
+    "fileComplaint": "File a complaint",
+    "writeSupportTicket": "Write a support ticket"
   },
   "alerts": {
     "trendingNow": "Trending now:",
@@ -114,7 +114,8 @@
     "title": "Notifications",
     "markAllRead": "Mark all as read",
     "loading": "Loading…",
-    "empty": "No notifications yet"
+    "empty": "No notifications yet",
+    "redirecting": "Redirecting…"
   },
   "profile": {
     "editTitle": "Edit Profile",

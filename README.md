@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Cryptoi Frontend
 
-## Getting Started
+`cryptoi` is a Next.js App Router frontend for the public user-facing product. It handles localized pages, authenticated user state, live updates through Socket.IO, and feed-style review and complaint surfaces.
 
-First, run the development server:
+## Setup
+
+Install dependencies and start the dev server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The frontend expects environment variables for backend communication:
 
-## Learn More
+- `NEXT_PUBLIC_API_URL`: base URL for REST API requests
+- `NEXT_PUBLIC_SOCKET_URL`: base URL for Socket.IO, if different from the current origin
 
-To learn more about Next.js, take a look at the following resources:
+`NEXT_PUBLIC_API_URL` is also used on the server for SSR fetches in [`lib/server-api.ts`](./lib/server-api.ts).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Commands
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `npm run dev`: start local development
+- `npm run build`: production build
+- `npm run start`: run the production build
+- `npm run lint`: run ESLint
 
-## Deploy on Vercel
+## Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `app/`: Next.js routes, layouts, and top-level providers
+- `features/`: domain-oriented UI, hooks, and API clients
+- `shared/`: reusable UI primitives and generic hooks
+- `lib/`: cross-cutting infrastructure such as env access, API wrappers, types, and contexts
+- `messages/`: locale message catalogs
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Standards
+
+- Keep domain behavior in `features/*`; use `lib/*` for shared infrastructure, not feature-specific logic.
+- Prefer typed API clients over inline `fetch` calls in components.
+- Keep large interactive components thin by extracting formatting and stateful behavior into hooks, utilities, or focused child components.
+- Treat server fetch failures explicitly when the page should distinguish between empty data and backend failure.
+
+## Verification
+
+Before shipping changes, run:
+
+```bash
+npm run lint
+npx tsc --noEmit
+```
+
+## Notes
+
+- The root route redirects to the default locale.
+- Auth state is hydrated through `next-auth` plus backend cookie checks.
+- Real-time updates are optional; the UI should remain usable when the socket is unavailable.

@@ -8,6 +8,7 @@ import { useToast } from "@/lib/contexts/ToastContext";
 import { safeApiMessage } from "@/lib/apiErrors";
 import { createCommentSchema } from "@/lib/validations";
 import VoteRail from "@/shared/components/ui/VoteRail";
+import { useVote } from "@/shared/hooks/useVote";
 import { commentsApi } from "@/features/comments/api/client";
 import type { Comment } from "@/lib/types";
 
@@ -19,6 +20,16 @@ interface CommentThreadProps {
   onCommentAdded?: () => void;
   onVoteUpdate?: (commentId: string, helpfulCount: number, downVoteCount: number) => void;
   maxDepth?: number;
+}
+
+const INDENT_CLASSES: Record<number, string> = {
+  0: "",
+  1: "pl-6",
+  2: "pl-12",
+  3: "pl-[72px]",
+};
+function getIndentClass(depth: number): string {
+  return INDENT_CLASSES[depth] ?? "pl-24";
 }
 
 export default function CommentThread({ comments, reviewId, postId, complaintId, onCommentAdded, onVoteUpdate, maxDepth = 5 }: CommentThreadProps) {
@@ -50,41 +61,28 @@ interface CommentItemProps extends Omit<CommentThreadProps, "comments"> {
 function CommentItem({ comment, reviewId, postId, complaintId, onCommentAdded, onVoteUpdate, depth, maxDepth }: CommentItemProps) {
   const t = useTranslations();
   const { showToast } = useToast();
-  const [isVoting, setIsVoting] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [replyError, setReplyError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [localHelpfulCount, setLocalHelpfulCount] = useState(comment.helpfulCount || 0);
-  const [localDownVoteCount, setLocalDownVoteCount] = useState(comment.downVoteCount || 0);
-  const [localUserVote, setLocalUserVote] = useState<"UP" | "DOWN" | null>(comment.userVote ?? null);
   const [localReplies, setLocalReplies] = useState<Comment[]>(comment.replies || []);
+
+  const { isVoting, helpfulCount, downVoteCount, isUpVoted, isDownVoted, handleVote } = useVote({
+    entityId: comment.id,
+    initialHelpfulCount: comment.helpfulCount ?? 0,
+    initialDownVoteCount: comment.downVoteCount ?? 0,
+    initialUserVote: comment.userVote ?? null,
+    voteRequest: commentsApi.vote,
+    onSuccess: (nextHelpfulCount, nextDownVoteCount) => {
+      onVoteUpdate?.(comment.id, nextHelpfulCount, nextDownVoteCount);
+    },
+  });
 
   const formatTimeAgo = (dateString: string) => {
     try {
       return formatDistanceToNow(new Date(dateString), { addSuffix: true });
     } catch {
       return t("common.time.hoursAgo");
-    }
-  };
-
-  const handleVote = async (voteType: "UP" | "DOWN") => {
-    if (isVoting) return;
-    setIsVoting(true);
-    try {
-      const result = await commentsApi.vote(comment.id, voteType);
-      if (result.error) {
-        showToast(safeApiMessage(result.error), "error");
-        return;
-      }
-      if (result.data) {
-        setLocalHelpfulCount(result.data.helpfulCount);
-        setLocalDownVoteCount(result.data.downVoteCount);
-        setLocalUserVote(result.data.voteType ?? null);
-        onVoteUpdate?.(comment.id, result.data.helpfulCount, result.data.downVoteCount);
-      }
-    } finally {
-      setIsVoting(false);
     }
   };
 
@@ -128,15 +126,17 @@ function CommentItem({ comment, reviewId, postId, complaintId, onCommentAdded, o
     }
   };
 
+  const indentClass = getIndentClass(depth);
+
   return (
-    <div className="flex gap-3" style={{ marginLeft: `${depth * 24}px` }}>
+    <div className={`flex gap-3 ${indentClass}`}>
       {depth > 0 && <div className="w-[2px] flex-shrink-0 bg-border-light" />}
       <div className="flex-1">
         <div className="flex items-start gap-3">
           <VoteRail
-            helpfulCount={localHelpfulCount}
-            downVoteCount={localDownVoteCount}
-            userVote={localUserVote}
+            helpfulCount={helpfulCount}
+            downVoteCount={downVoteCount}
+            userVote={isUpVoted ? "UP" : isDownVoted ? "DOWN" : null}
             onVote={handleVote}
             disabled={isVoting}
             variant="comment"
@@ -203,3 +203,4 @@ function CommentItem({ comment, reviewId, postId, complaintId, onCommentAdded, o
     </div>
   );
 }
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ApiResponse } from "@/lib/api/core";
 import type { VoteResponse, VoteType } from "@/lib/types";
 
@@ -15,6 +15,7 @@ interface UseVoteOptions {
   onSuccess?: (helpfulCount: number, downVoteCount: number, voteType: VoteType | null) => void;
 }
 
+/** Applies initial counts only when entityId changes (new entity). After that, state updates only from server response to avoid flicker when parent re-renders. */
 export function useVote({
   entityId,
   initialHelpfulCount = 0,
@@ -27,6 +28,17 @@ export function useVote({
   const [helpfulCount, setHelpfulCount] = useState(initialHelpfulCount);
   const [downVoteCount, setDownVoteCount] = useState(initialDownVoteCount);
   const [userVote, setUserVote] = useState<VoteType | null>(initialUserVote);
+  const prevEntityIdRef = useRef<string | null>(null);
+
+  // Apply initial values only when entityId changes (new entity). Avoids flicker from parent re-renders.
+  useEffect(() => {
+    if (prevEntityIdRef.current !== entityId) {
+      prevEntityIdRef.current = entityId;
+      setHelpfulCount(initialHelpfulCount);
+      setDownVoteCount(initialDownVoteCount);
+      setUserVote(initialUserVote);
+    }
+  }, [entityId, initialHelpfulCount, initialDownVoteCount, initialUserVote]);
 
   const handleVote = async (voteType: VoteType) => {
     if (isVoting) return;

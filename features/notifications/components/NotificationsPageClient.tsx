@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -16,9 +17,20 @@ export default function NotificationsPageClient() {
     strategy: "immediate",
   });
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      router.replace("/");
+    }
+  }, [isLoggedIn, router]);
+
   if (!isLoggedIn) {
-    router.replace("/");
-    return null;
+    return (
+      <AppShell contentClassName="content-section mt-15">
+        <p className="py-8 text-center text-sm text-text-tertiary">
+          {t("notifications.redirecting", { defaultValue: "Redirecting…" })}
+        </p>
+      </AppShell>
+    );
   }
 
   return (

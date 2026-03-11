@@ -87,7 +87,8 @@
     "title": "Notificaciones",
     "markAllRead": "Marcar todo como leído",
     "loading": "Cargando…",
-    "empty": "Aún no hay notificaciones"
+    "empty": "Aún no hay notificaciones",
+    "redirecting": "Redirigiendo…"
   },
   "profile": {
     "editTitle": "Editar perfil",

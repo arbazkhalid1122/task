@@ -1,11 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { helpMenuItems } from "@/shared/data/uiContent";
+import { helpMenuKeys } from "@/shared/data/uiContent";
 import Separator from "@/shared/components/ui/Separator";
 import { Link } from "@/i18n/routing";
+
+const HELP_MENU_ACTIONS: Record<(typeof helpMenuKeys)[number], "messages" | "editProfile" | "changePassword" | "complaint" | "supportTicket"> = {
+  readMessages: "messages",
+  editProfile: "editProfile",
+  changePassword: "changePassword",
+  fileComplaint: "complaint",
+  writeSupportTicket: "supportTicket",
+};
 
 interface SidebarHelpPanelProps {
   onEditProfile: () => void;
@@ -17,16 +24,6 @@ export default function SidebarHelpPanel({
   onChangePassword,
 }: SidebarHelpPanelProps) {
   const t = useTranslations();
-  const labels = useMemo(
-    () => [
-      `${t("sidebar.readMessages")} (29)`,
-      t("sidebar.editProfile"),
-      t("sidebar.changePassword"),
-      t("sidebar.fileComplaint"),
-      `${t("sidebar.writeSupportTicket")} (4)`,
-    ],
-    [t],
-  );
 
   return (
     <div className="mt-4 rounded-md bg-bg-light p-3 px-4 text-center sm:px-14 sm:text-end">
@@ -36,16 +33,17 @@ export default function SidebarHelpPanel({
       </div>
       <Separator />
       <div className="mt-2 space-y-2 text-center text-[13px] text-text-quaternary sm:text-end">
-        {helpMenuItems.map((item, index, array) => {
-          const label = labels[index] || item;
+        {helpMenuKeys.map((key, index, array) => {
+          const label = t(`sidebar.${key}`);
+          const action = HELP_MENU_ACTIONS[key];
           return (
-            <div key={`${item}-${index}`}>
+            <div key={key}>
               <div className="pb-1 text-center font-inter font-normal text-text-primary sm:text-end">
-                {index === 1 ? (
+                {action === "editProfile" ? (
                   <button type="button" onClick={onEditProfile} className="text-left hover:text-primary hover:underline">
                     {label}
                   </button>
-                ) : index === 2 ? (
+                ) : action === "changePassword" ? (
                   <button
                     type="button"
                     onClick={onChangePassword}
@@ -53,7 +51,7 @@ export default function SidebarHelpPanel({
                   >
                     {label}
                   </button>
-                ) : index === 3 ? (
+                ) : action === "complaint" ? (
                   <Link href="/complaints" className="hover:text-primary hover:underline">
                     {label}
                   </Link>

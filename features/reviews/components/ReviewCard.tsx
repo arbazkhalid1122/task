@@ -3,12 +3,13 @@
 import Image from "next/image";
 import { LuDot } from "react-icons/lu";
 import { useTranslations } from "next-intl";
-import { formatDistanceToNow } from "date-fns";
 import Separator from "@/shared/components/ui/Separator";
 import HighlightFirstWord from "@/shared/components/ui/HighlightFirstWord";
 import VoteRail from "@/shared/components/ui/VoteRail";
 import CommentThread from "@/features/comments/components/CommentThread";
 import { useComments } from "@/features/comments/hooks/useComments";
+import ReviewScore from "@/features/reviews/components/ReviewScore";
+import { formatReviewTimeAgo, translateWithFallback } from "@/features/reviews/utils/reviewFormatting";
 import { reviewsApi } from "@/features/reviews/api/client";
 import { useVote } from "@/shared/hooks/useVote";
 import type { Review } from "@/lib/types";
@@ -46,38 +47,15 @@ export default function ReviewCard({ review, onVoteUpdate }: ReviewCardProps) {
   } = useComments({ targetKey: "reviewId", targetId: review.id, initialCount: review._count?.comments ?? 0 });
 
   const authorName = review.author?.username || "Anonymous";
-
-  const formatTimeAgo = (dateString: string) => {
-    try {
-      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
-    } catch {
-      return t("common.time.hoursAgo");
-    }
-  };
-
-  const translate = (key: string, fallback: string) => {
-    try {
-      const result = t(key as never);
-      return result === key ? fallback : result;
-    } catch {
-      return fallback;
-    }
-  };
-
-  const renderStars = (score: number) => {
-    const fullStars = Math.floor(score);
-    const hasHalfStar = score % 1 >= 0.5;
-    const emptyStars = 10 - fullStars - (hasHalfStar ? 1 : 0);
-
-    return (
-      <span className="mr-4 text-lg font-bold leading-[14px] tracking-normal text-primary-dark">
-        <span className="text-primary-lighter">{"★".repeat(fullStars)}</span>
-        {hasHalfStar && <span className="text-primary-lighter">★</span>}
-        <span className="text-gray-300">{"☆".repeat(emptyStars)}</span>
-        <span className="ml-1 text-primary-lighter">{score.toFixed(1)}/10</span>
-      </span>
-    );
-  };
+  const timeAgoLabel = formatReviewTimeAgo(review.createdAt, t("common.time.hoursAgo"));
+  const commentPlaceholder = translateWithFallback(t, "common.comment.writeComment", "Write a comment...");
+  const postCommentLabel = translateWithFallback(t, "common.comment.post", "Post Comment");
+  const loadingCommentsLabel = translateWithFallback(t, "common.comment.loadingComments", "Loading comments...");
+  const emptyCommentsLabel = translateWithFallback(
+    t,
+    "common.comment.noComments",
+    "No comments yet. Be the first to comment!",
+  );
 
   return (
     <article className="card">
@@ -101,7 +79,7 @@ export default function ReviewCard({ review, onVoteUpdate }: ReviewCardProps) {
                 {review.author?.verified && <span className="ml-1">✓</span>}
               </p>
               <p className="meta-line">
-                <span className="meta-muted">{formatTimeAgo(review.createdAt)}</span>
+                <span className="meta-muted">{timeAgoLabel}</span>
                 <span className="meta-muted">•</span>
                 <span className="font-semibold text-primary">
                   {t("common.review.category")} • {t("common.review.productCategory")}
@@ -110,7 +88,7 @@ export default function ReviewCard({ review, onVoteUpdate }: ReviewCardProps) {
             </div>
           </div>
           <Separator />
-          {renderStars(review.overallScore)}
+          <ReviewScore score={review.overallScore} />
           <h3 className="content-title"><HighlightFirstWord text={review.title} /></h3>
           <p className="content-body">{review.content}</p>
           <div className="action-row">
@@ -129,18 +107,18 @@ export default function ReviewCard({ review, onVoteUpdate }: ReviewCardProps) {
                 <textarea
                   value={commentContent}
                   onChange={(event) => setCommentContent(event.target.value)}
-                  placeholder={translate("common.comment.writeComment", "Write a comment...")}
+                  placeholder={commentPlaceholder}
                   className="comment-form-textarea"
                   rows={3}
                   required
                 />
                 <button type="submit" disabled={!commentContent.trim() || isSubmittingComment} className="comment-submit-btn">
-                  {isSubmittingComment ? t("common.auth.processing") : translate("common.comment.post", "Post Comment")}
+                  {isSubmittingComment ? t("common.auth.processing") : postCommentLabel}
                 </button>
               </form>
 
               {loadingComments ? (
-                <div className="py-4 text-center text-sm text-text-quaternary">{translate("common.comment.loadingComments", "Loading comments...")}</div>
+                <div className="py-4 text-center text-sm text-text-quaternary">{loadingCommentsLabel}</div>
               ) : comments.length > 0 ? (
                 <CommentThread
                   comments={comments}
@@ -154,7 +132,7 @@ export default function ReviewCard({ review, onVoteUpdate }: ReviewCardProps) {
                 />
               ) : (
                 <div className="py-4 text-center text-sm text-text-quaternary">
-                  {translate("common.comment.noComments", "No comments yet. Be the first to comment!")}
+                  {emptyCommentsLabel}
                 </div>
               )}
             </div>

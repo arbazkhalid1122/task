@@ -40,8 +40,8 @@ export default function HomeReviewsSection({ initialReviews }: HomeReviewsSectio
         <FeedLoading />
       ) : reviews.length > 0 ? (
         <>
-          {reviews.map((review, index) => (
-            <ReviewCard key={review.id || index} review={review} onVoteUpdate={updateReviewVote} />
+          {reviews.map((review) => (
+            <ReviewCard key={review.id} review={review} onVoteUpdate={updateReviewVote} />
           ))}
           <div ref={sentinelRef} className="min-h-4" aria-hidden />
           {loadingMore && <FeedLoadMore />}

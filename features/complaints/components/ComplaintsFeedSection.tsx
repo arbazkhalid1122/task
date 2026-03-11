@@ -34,7 +34,7 @@ export default function ComplaintsFeedSection({ initialComplaints }: ComplaintsF
       ) : complaints.length > 0 ? (
         <>
           {complaints.map((complaint, index) => (
-            <ComplaintListCard key={complaint.id || index} complaint={complaint} index={index} />
+            <ComplaintListCard key={complaint.id} complaint={complaint} index={index} />
           ))}
           <div ref={sentinelRef} className="min-h-4" aria-hidden />
           {loadingMore && <FeedLoadMore />}

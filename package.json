@@ -1,12 +1,12 @@
 {
-  "name": "task",
+  "name": "cryptoi",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint .",
     "db:generate": "node scripts/setup-env.js && prisma generate --schema=./backend/prisma/schema.prisma",
     "db:push": "node scripts/setup-env.js && prisma db push --schema=./backend/prisma/schema.prisma",
     "db:migrate": "node scripts/setup-env.js && prisma migrate dev --schema=./backend/prisma/schema.prisma",

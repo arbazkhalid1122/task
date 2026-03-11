@@ -101,7 +101,8 @@
     "title": "Notifications",
     "markAllRead": "Tout marquer comme lu",
     "loading": "Chargement…",
-    "empty": "Aucune notification"
+    "empty": "Aucune notification",
+    "redirecting": "Redirection…"
   },
   "profile": {
     "editTitle": "Modifier le profil",

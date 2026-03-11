@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { alerts, sidebarMenuItems, languageItems } from "@/shared/data/uiContent";
+import { alerts, sidebarMenuKeys, languageItems } from "@/shared/data/uiContent";
 import AlertCard from "@/shared/components/feedback/AlertCard";
 import SidebarMenuItem from "@/shared/components/layout/SidebarMenuItem";
 import Separator from "@/shared/components/ui/Separator";
@@ -13,18 +13,6 @@ export default function LeftSidebar() {
   const t = useTranslations();
   const [activeItem, setActiveItem] = useState<string | null>(null);
   const [sidebarAlerts, setSidebarAlerts] = useState(alerts);
-
-  const sidebarMenuTranslations: Record<string, string> = {
-    "Exchanges": t('sidebar.exchanges'),
-    "Wallets": t('sidebar.wallets'),
-    "New Wallets": t('sidebar.newWallets'),
-    "Top 10 Wallets": t('sidebar.top10Wallets'),
-    "Blacklisted Wallets": t('sidebar.blacklistedWallets'),
-    "Hardware": t('sidebar.hardware'),
-    "Casinos": t('sidebar.casinos'),
-    "Games": t('sidebar.games'),
-    "NFT": t('sidebar.nft'),
-  };
 
   useEffect(() => {
     let isMounted = true;
@@ -100,19 +88,19 @@ export default function LeftSidebar() {
       {sidebarAlerts.map((alert, index) => (
         <AlertCard key={alert.type} alert={alert} index={index} />
       ))}
-      {sidebarMenuItems.map((item) => (
+      {sidebarMenuKeys.map((key) => (
         <SidebarMenuItem
-          key={item}
-          item={sidebarMenuTranslations[item] || item}
-          isActive={activeItem === item}
-          onClick={() => setActiveItem(item)}
+          key={key}
+          item={t(`sidebar.${key}`)}
+          isActive={activeItem === key}
+          onClick={() => setActiveItem(key)}
         />
       ))}
       <Separator />
       {languageItems.map((item) => (
         <SidebarMenuItem
           key={item}
-          item={t('sidebar.language')}
+          item={t("sidebar.language")}
           isActive={activeItem === item}
           onClick={() => setActiveItem(item)}
         />

@@ -109,7 +109,8 @@
     "title": "Benachrichtigungen",
     "markAllRead": "Alle als gelesen markieren",
     "loading": "Wird geladen…",
-    "empty": "Noch keine Benachrichtigungen"
+    "empty": "Noch keine Benachrichtigungen",
+    "redirecting": "Weiterleitung…"
   },
   "profile": {
     "editTitle": "Profil bearbeiten",
