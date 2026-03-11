@@ -1,12 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Header from "../components/Header";
-import LeftSidebar from "../components/LeftSidebar";
 import CompanyProfile from "../components/CompanyProfile";
 import ReviewCard from "../components/ReviewCard";
-import RightSidebar from "../components/RightSidebar";
-import Footer from "../components/Footer";
+import AppShell from "@/features/layout/components/AppShell";
 import { useReviewsFeed } from "../../lib/hooks/useReviewsFeed";
 import type { Review } from "../../lib/types";
 
@@ -35,61 +32,45 @@ export default function HomeClient({ initialReviews }: HomeClientProps) {
   }, [hasMore, loadMore, loadingMore, loading]);
 
   return (
-    <div className="bg-bg-white text-foreground">
-      <Header />
-      <div className="page-container">
-        <div className="page-main-wrap">
-          <main className="main-grid">
-            <LeftSidebar />
+    <AppShell>
+      <CompanyProfile
+        onReviewSubmitted={(newReview) => {
+          if (newReview && typeof newReview === "object" && "id" in newReview) {
+            const typedReview = newReview as Review;
+            setReviews((prevReviews) =>
+              prevReviews.some((review) => review.id === typedReview.id)
+                ? prevReviews
+                : [typedReview, ...prevReviews]
+            );
+            return;
+          }
+          void fetchReviews();
+        }}
+      />
 
-            <section className="content-section">
-              <CompanyProfile
-                onReviewSubmitted={(newReview) => {
-                  if (newReview && typeof newReview === "object" && "id" in newReview) {
-                    const typedReview = newReview as Review;
-                    setReviews((prevReviews) =>
-                      prevReviews.some((review) => review.id === typedReview.id)
-                        ? prevReviews
-                        : [typedReview, ...prevReviews]
-                    );
-                    return;
-                  }
-                  void fetchReviews();
-                }}
-              />
-
-              {loading ? (
-                <div className="text-center py-8 text-text-primary">Loading reviews...</div>
-              ) : reviews.length > 0 ? (
-                <>
-                  {reviews.map((review, index) => (
-                    <ReviewCard
-                      key={review.id || index}
-                      review={review}
-                      index={index}
-                      onVoteUpdate={updateReviewVote}
-                    />
-                  ))}
-                  <div ref={sentinelRef} className="min-h-4" aria-hidden />
-                  {loadingMore && (
-                    <div className="text-center py-6 text-text-tertiary text-sm">Loading more...</div>
-                  )}
-                  {!hasMore && reviews.length > 0 && (
-                    <div className="text-center py-4 text-text-tertiary text-sm">No more reviews</div>
-                  )}
-                </>
-              ) : (
-                <div className="text-center py-8 text-text-primary">
-                  No reviews yet. Be the first to review!
-                </div>
-              )}
-            </section>
-
-            <RightSidebar />
-          </main>
-        </div>
-      </div>
-      <Footer />
-    </div>
+      {loading ? (
+        <div className="text-center py-8 text-text-primary">Loading reviews...</div>
+      ) : reviews.length > 0 ? (
+        <>
+          {reviews.map((review, index) => (
+            <ReviewCard
+              key={review.id || index}
+              review={review}
+              index={index}
+              onVoteUpdate={updateReviewVote}
+            />
+          ))}
+          <div ref={sentinelRef} className="min-h-4" aria-hidden />
+          {loadingMore && (
+            <div className="text-center py-6 text-text-tertiary text-sm">Loading more...</div>
+          )}
+          {!hasMore && reviews.length > 0 && (
+            <div className="text-center py-4 text-text-tertiary text-sm">No more reviews</div>
+          )}
+        </>
+      ) : (
+        <div className="text-center py-8 text-text-primary">No reviews yet. Be the first to review!</div>
+      )}
+    </AppShell>
   );
 }

@@ -37,19 +37,12 @@ export default async function LocaleLayout({
     : { isLoggedIn: false, user: null };
 
   return (
-    <html lang={locale}>
-      <head />
-      <body
-        className="antialiased"
-      >
-        <Providers initialAuth={initialAuth}>
-          <NextIntlClientProvider messages={messages}>
-            {children}
-            <CookieConsent />
-            <AnalyticsTracker />
-          </NextIntlClientProvider>
-        </Providers>
-      </body>
-    </html>
+    <Providers initialAuth={initialAuth}>
+      <NextIntlClientProvider messages={messages}>
+        {children}
+        <CookieConsent />
+        <AnalyticsTracker />
+      </NextIntlClientProvider>
+    </Providers>
   );
 }

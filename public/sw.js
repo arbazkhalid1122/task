@@ -1,10 +1,9 @@
-/* eslint-disable no-restricted-globals */
 self.addEventListener('push', (event) => {
   let data = { title: 'Notification', body: '', url: '/' };
   if (event.data) {
     try {
       data = event.data.json();
-    } catch (_) {}
+    } catch {}
   }
   const options: NotificationOptions = {
     body: data.body || '',

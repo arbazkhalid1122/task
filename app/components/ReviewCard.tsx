@@ -4,7 +4,6 @@ import Image from "next/image";
 import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
 import { LuDot } from "react-icons/lu";
 import { useTranslations } from 'next-intl';
-import { renderTextWithFirstWordColored } from "../utils/textUtils";
 import Separator from "./Separator";
 import { formatDistanceToNow } from "date-fns";
 import { reviewsApi } from "../../lib/api";
@@ -12,6 +11,7 @@ import CommentThread from "./CommentThread";
 import { useVote } from "../../lib/hooks/useVote";
 import { useComments } from "../../lib/hooks/useComments";
 import type { Review } from "../../lib/types";
+import HighlightFirstWord from "@/shared/ui/HighlightFirstWord";
 
 interface ReviewCardProps {
   review: Review;
@@ -143,7 +143,9 @@ export default function ReviewCard({ review, index: _index, onVoteUpdate }: Revi
           </div>
           <Separator />
           {renderStars(review.overallScore)}
-          <h3 className="content-title">{renderTextWithFirstWordColored(review.title)}</h3>
+          <h3 className="content-title">
+            <HighlightFirstWord text={review.title} />
+          </h3>
           <p className="content-body">{review.content}</p>
           <div className="action-row">
             <button type="button" onClick={handleToggleComments} className="action-btn-strong">

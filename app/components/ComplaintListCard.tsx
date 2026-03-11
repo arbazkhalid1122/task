@@ -3,9 +3,9 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
-import { renderTextWithFirstWordColored } from "../utils/textUtils";
 import Separator from "./Separator";
 import type { Complaint } from "@/lib/types";
+import HighlightFirstWord from "@/shared/ui/HighlightFirstWord";
 
 const statusClass: Record<string, string> = {
   OPEN: "status-badge status-open",
@@ -64,7 +64,9 @@ export default function ComplaintListCard({ complaint, index: _index }: Complain
             </div>
           </div>
           <Separator />
-          <h3 className="content-title">{renderTextWithFirstWordColored(complaint.title)}</h3>
+          <h3 className="content-title">
+            <HighlightFirstWord text={complaint.title} />
+          </h3>
           <p className="content-body">{complaint.content}</p>
         </div>
         <Image src="/verify.svg" alt="" width={16} height={16} className="flex-shrink-0" />

@@ -2,19 +2,24 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 import { signIn, useSession } from "next-auth/react";
-import { helpMenuItems, topRatedCards } from "../data/constants";
+import { helpMenuItems, topRatedCards } from "@/app/data/constants";
 import { Link } from "@/i18n/routing";
-import Separator from "./Separator";
-import TopRatedCard from "./TopRatedCard";
-import Toast from "./Toast";
-import { authApi, trendingApi } from "../../lib/api";
-import { loginSchema, registerSchema, updateProfileSchema, changePasswordFormSchema } from "../../lib/validations";
-import { trackAnalyticsEvent } from "./AnalyticsTracker";
+import Separator from "@/app/components/Separator";
+import TopRatedCard from "@/app/components/TopRatedCard";
+import Toast from "@/app/components/Toast";
+import { authApi, trendingApi } from "@/lib/api";
+import {
+  loginSchema,
+  registerSchema,
+  updateProfileSchema,
+  changePasswordFormSchema,
+} from "@/lib/validations";
+import { trackAnalyticsEvent } from "@/app/components/AnalyticsTracker";
 import { FcGoogle } from "react-icons/fc";
-import { useAuth } from "../contexts/AuthContext";
-import { truncateWithEllipsis } from "../utils/textUtils";
+import { useAuth } from "@/app/contexts/AuthContext";
+import { truncateWithEllipsis } from "@/shared/utils/text";
 
 type SidebarView = "help" | "edit-profile" | "change-password";
 

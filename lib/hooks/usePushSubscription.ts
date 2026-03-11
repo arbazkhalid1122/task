@@ -57,7 +57,7 @@ export function usePushSubscription(enabled: boolean) {
       } else {
         setStatus("registered");
       }
-    } catch (_) {
+    } catch {
       setStatus("error");
     } finally {
       setIsRegistering(false);

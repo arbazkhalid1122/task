@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from 'next-intl';
-import { alerts, sidebarMenuItems, languageItems } from "../data/constants";
-import AlertCard from "./AlertCard";
-import SidebarMenuItem from "./SidebarMenuItem";
-import Separator from "./Separator";
-import { trendingApi } from "../../lib/api";
-import { truncateWithEllipsis } from "../utils/textUtils";
+import { useTranslations } from "next-intl";
+import { alerts, sidebarMenuItems, languageItems } from "@/app/data/constants";
+import AlertCard from "@/app/components/AlertCard";
+import SidebarMenuItem from "@/app/components/SidebarMenuItem";
+import Separator from "@/app/components/Separator";
+import { trendingApi } from "@/lib/api";
+import { truncateWithEllipsis } from "@/shared/utils/text";
 
 export default function LeftSidebar() {
   const t = useTranslations();
