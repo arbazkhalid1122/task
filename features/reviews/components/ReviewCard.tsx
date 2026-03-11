@@ -21,7 +21,7 @@ interface ReviewCardProps {
 
 export default function ReviewCard({ review, onVoteUpdate }: ReviewCardProps) {
   const t = useTranslations();
-  const { isVoting, helpfulCount, downVoteCount, isUpVoted, isDownVoted, handleVote } = useVote({
+  const { helpfulCount, downVoteCount, isUpVoted, isDownVoted, handleVote } = useVote({
     entityId: review.id,
     initialHelpfulCount: review.helpfulCount ?? review._count?.helpfulVotes ?? 0,
     initialDownVoteCount: review.downVoteCount ?? 0,
@@ -65,7 +65,6 @@ export default function ReviewCard({ review, onVoteUpdate }: ReviewCardProps) {
           downVoteCount={downVoteCount}
           userVote={isUpVoted ? "UP" : isDownVoted ? "DOWN" : null}
           onVote={handleVote}
-          disabled={isVoting}
           variant="card"
         />
         <div className="card-body">

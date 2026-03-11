@@ -67,7 +67,7 @@ function CommentItem({ comment, reviewId, postId, complaintId, onCommentAdded, o
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localReplies, setLocalReplies] = useState<Comment[]>(comment.replies || []);
 
-  const { isVoting, helpfulCount, downVoteCount, isUpVoted, isDownVoted, handleVote } = useVote({
+  const { helpfulCount, downVoteCount, isUpVoted, isDownVoted, handleVote } = useVote({
     entityId: comment.id,
     initialHelpfulCount: comment.helpfulCount ?? 0,
     initialDownVoteCount: comment.downVoteCount ?? 0,
@@ -138,7 +138,6 @@ function CommentItem({ comment, reviewId, postId, complaintId, onCommentAdded, o
             downVoteCount={downVoteCount}
             userVote={isUpVoted ? "UP" : isDownVoted ? "DOWN" : null}
             onVote={handleVote}
-            disabled={isVoting}
             variant="comment"
           />
 
@@ -203,4 +202,3 @@ function CommentItem({ comment, reviewId, postId, complaintId, onCommentAdded, o
     </div>
   );
 }
-

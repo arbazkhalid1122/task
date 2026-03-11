@@ -24,11 +24,11 @@ export function useVote({
   voteRequest,
   onSuccess,
 }: UseVoteOptions) {
-  const [isVoting, setIsVoting] = useState(false);
   const [helpfulCount, setHelpfulCount] = useState(initialHelpfulCount);
   const [downVoteCount, setDownVoteCount] = useState(initialDownVoteCount);
   const [userVote, setUserVote] = useState<VoteType | null>(initialUserVote);
   const prevEntityIdRef = useRef<string | null>(null);
+  const isVotingRef = useRef(false);
 
   // Apply initial values only when entityId changes (new entity). Avoids flicker from parent re-renders.
   useEffect(() => {
@@ -41,9 +41,9 @@ export function useVote({
   }, [entityId, initialHelpfulCount, initialDownVoteCount, initialUserVote]);
 
   const handleVote = async (voteType: VoteType) => {
-    if (isVoting) return;
+    if (isVotingRef.current) return;
 
-    setIsVoting(true);
+    isVotingRef.current = true;
     try {
       const response = await voteRequest(entityId, voteType);
       if (response.error || !response.data) return;
@@ -56,12 +56,11 @@ export function useVote({
     } catch (error) {
       console.error("Error voting:", error);
     } finally {
-      setIsVoting(false);
+      isVotingRef.current = false;
     }
   };
 
   return {
-    isVoting,
     helpfulCount,
     downVoteCount,
     userVote,

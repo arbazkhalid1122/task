@@ -3,8 +3,8 @@
 import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
 import type { VoteType } from "@/lib/types";
 
-function getVoteButtonClass(isActive: boolean, isVoting: boolean): string {
-  return `vote-btn ${isActive ? "vote-btn-active" : "vote-btn-idle"} ${isVoting ? "vote-btn-waiting" : "vote-btn-ready"}`;
+function getVoteButtonClass(isActive: boolean): string {
+  return `vote-btn ${isActive ? "vote-btn-active" : "vote-btn-idle"} vote-btn-ready`;
 }
 
 export interface VoteRailProps {
@@ -37,7 +37,6 @@ export default function VoteRail({
   downVoteCount,
   userVote,
   onVote,
-  disabled = false,
   variant = "card",
 }: VoteRailProps) {
   const classes = variantClasses[variant];
@@ -48,8 +47,7 @@ export default function VoteRail({
       <button
         type="button"
         onClick={() => onVote("UP")}
-        disabled={disabled}
-        className={getVoteButtonClass(userVote === "UP", disabled)}
+        className={getVoteButtonClass(userVote === "UP")}
         aria-label="Vote up"
       >
         <IoMdArrowUp color="#00885E" size={size} className={userVote === "UP" ? "drop-shadow-md" : ""} />
@@ -58,8 +56,7 @@ export default function VoteRail({
       <button
         type="button"
         onClick={() => onVote("DOWN")}
-        disabled={disabled}
-        className={getVoteButtonClass(userVote === "DOWN", disabled)}
+        className={getVoteButtonClass(userVote === "DOWN")}
         aria-label="Vote down"
       >
         <IoMdArrowDown color="#EA580C" size={size} className={userVote === "DOWN" ? "drop-shadow-md" : ""} />
