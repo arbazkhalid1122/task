@@ -5,10 +5,7 @@ import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { routing } from '@/i18n/routing';
 import Providers from '@/app/providers';
-import AnalyticsTracker from '@/shared/components/analytics/AnalyticsTracker';
-import CookieConsent from '@/shared/components/feedback/CookieConsent';
-import { getServerAuth } from '@/lib/server-api';
-import { hasLikelyAuthCookie } from '@/lib/authCookies';
+import DeferredExtras from '@/app/[locale]/DeferredExtras';
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -55,20 +52,15 @@ export default async function LocaleLayout({
   const messages = (await import(`../../messages/${locale}.json`)).default;
 
   const cookieStore = await cookies();
-  const cookieHeader = cookieStore.toString();
   const analyticsConsentValue = cookieStore.get("analytics_consent")?.value;
-  const initialAuth = hasLikelyAuthCookie(cookieHeader)
-    ? await getServerAuth(cookieHeader)
-    : { isLoggedIn: false, user: null };
   const initialAnalyticsConsent =
     analyticsConsentValue === "true" ? true : analyticsConsentValue === "false" ? false : null;
 
   return (
-    <Providers initialAuth={initialAuth}>
+    <Providers>
       <NextIntlClientProvider messages={messages}>
         {children}
-        <CookieConsent initialConsent={initialAnalyticsConsent} />
-        <AnalyticsTracker />
+        <DeferredExtras initialAnalyticsConsent={initialAnalyticsConsent} />
       </NextIntlClientProvider>
     </Providers>
   );

@@ -1,4 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Space_Grotesk } from "next/font/google";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -32,7 +43,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html suppressHydrationWarning lang="en">
-      <body className="antialiased">{children}</body>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}>{children}</body>
     </html>
   );
 }

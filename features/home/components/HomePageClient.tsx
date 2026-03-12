@@ -1,17 +1,10 @@
-"use client";
-
+import type { ReactNode } from "react";
 import AppShell from "@/features/layout/components/AppShell";
-import HomeReviewsSection from "@/features/reviews/components/HomeReviewsSection";
-import type { Review } from "@/lib/types";
 
 interface HomePageClientProps {
-  initialReviews: Review[];
+  children: ReactNode;
 }
 
-export default function HomePageClient({ initialReviews }: HomePageClientProps) {
-  return (
-    <AppShell>
-      <HomeReviewsSection initialReviews={initialReviews} />
-    </AppShell>
-  );
+export default function HomePageClient({ children }: HomePageClientProps) {
+  return <AppShell>{children}</AppShell>;
 }

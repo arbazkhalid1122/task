@@ -16,7 +16,14 @@ export default function CompanyHero({ isLoggedIn }: CompanyHeroProps) {
         <>
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:gap-0">
             <div className="flex gap-3">
-              <Image src="/logo.png" alt="company-logo" width={64} height={64} className="flex-shrink-0" />
+              <Image
+                src="/logo.png"
+                alt="company-logo"
+                width={64}
+                height={64}
+                className="flex-shrink-0"
+                priority
+              />
               <div>
                 <h1 className="text-sm font-semibold text-text-heading">{companyProfile.name}</h1>
                 <p className="text-xl font-bold text-primary-lighter">{companyProfile.score}</p>

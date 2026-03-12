@@ -1,11 +1,8 @@
 @import "tailwindcss";
-@import "@fontsource/space-grotesk/500.css";
 
 :root {
   --background: #ffffff;
   --foreground: #2f4444;
-  --font-inter: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-space-grotesk: "Space Grotesk", "Avenir Next", "Segoe UI", Arial, sans-serif;
 }
 
 @theme inline {
