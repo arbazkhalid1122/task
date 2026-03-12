@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
-import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
+import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import Providers from '@/app/providers';
 import DeferredExtras from '@/app/[locale]/DeferredExtras';
