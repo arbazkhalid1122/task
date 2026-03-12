@@ -153,6 +153,15 @@
     "choicesHeading": "Ihre Wahl",
     "choicesBody": "Sie können Analysen beim Hinweis akzeptieren oder ablehnen. Sie können Ihre Wahl ändern, indem Sie Cookies löschen.",
     "backHome": "Zurück zur Startseite"
+  },
+  "errors": {
+    "somethingWentWrong": "Etwas ist schiefgelaufen",
+    "couldNotLoadPage": "Diese Seite konnte nicht geladen werden. Bitte versuchen Sie es erneut.",
+    "couldNotLoadApp": "Die App konnte nicht geladen werden. Bitte versuchen Sie es erneut.",
+    "tryAgain": "Erneut versuchen",
+    "backToHome": "Zurück zur Startseite",
+    "pageNotFound": "Seite nicht gefunden",
+    "pageNotFoundDescription": "Die gesuchte Seite existiert nicht oder wurde verschoben."
   }
 }
 

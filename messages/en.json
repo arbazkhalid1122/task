@@ -152,6 +152,15 @@
     "emptyReviews": "No reviews yet. Be the first to review!",
     "emptyComplaints": "No complaints yet. Be the first to file one."
   },
+  "errors": {
+    "somethingWentWrong": "Something went wrong",
+    "couldNotLoadPage": "We couldn't load this page. Please try again.",
+    "couldNotLoadApp": "We couldn't load the app. Please try again.",
+    "tryAgain": "Try again",
+    "backToHome": "Back to home",
+    "pageNotFound": "Page not found",
+    "pageNotFoundDescription": "The page you're looking for doesn't exist or has been moved."
+  },
   "privacy": {
     "title": "Privacy Policy",
     "lastUpdated": "Last updated: March 2026",

@@ -153,6 +153,15 @@
     "choicesHeading": "Uw keuze",
     "choicesBody": "U kunt analytics accepteren of weigeren bij de melding. U kunt uw keuze wijzigen door cookies te wissen.",
     "backHome": "Terug naar home"
+  },
+  "errors": {
+    "somethingWentWrong": "Er is iets misgegaan",
+    "couldNotLoadPage": "We konden deze pagina niet laden. Probeer het opnieuw.",
+    "couldNotLoadApp": "We konden de app niet laden. Probeer het opnieuw.",
+    "tryAgain": "Opnieuw proberen",
+    "backToHome": "Terug naar home",
+    "pageNotFound": "Pagina niet gevonden",
+    "pageNotFoundDescription": "De pagina die u zoekt bestaat niet of is verplaatst."
   }
 }
 
