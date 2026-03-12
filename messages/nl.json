@@ -154,6 +154,19 @@
     "choicesBody": "U kunt analytics accepteren of weigeren bij de melding. U kunt uw keuze wijzigen door cookies te wissen.",
     "backHome": "Terug naar home"
   },
+  "metadata": {
+    "siteName": "cryptoi",
+    "defaultTitle": "cryptoi – Crypto-recensies, klachten & discussie",
+    "defaultDescription": "Echte crypto-gebruikerservaringen, geverifieerde recensies en waarschuwingen. Vergelijk beurzen, wallets en DeFi zonder hype.",
+    "homeTitle": "cryptoi – Crypto-recensies, klachten & discussie",
+    "homeDescription": "Echte crypto-gebruikerservaringen, geverifieerde recensies en waarschuwingen.",
+    "complaintsTitle": "Klachten – cryptoi",
+    "complaintsDescription": "Bekijk en dien klachten in over crypto-diensten.",
+    "notificationsTitle": "Meldingen – cryptoi",
+    "notificationsDescription": "Uw meldingen",
+    "privacyTitle": "Privacybeleid – cryptoi",
+    "privacyDescription": "Hoe cryptoi omgaat met uw gegevens en analytics."
+  },
   "errors": {
     "somethingWentWrong": "Er is iets misgegaan",
     "couldNotLoadPage": "We konden deze pagina niet laden. Probeer het opnieuw.",

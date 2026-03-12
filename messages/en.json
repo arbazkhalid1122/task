@@ -152,6 +152,19 @@
     "emptyReviews": "No reviews yet. Be the first to review!",
     "emptyComplaints": "No complaints yet. Be the first to file one."
   },
+  "metadata": {
+    "siteName": "cryptoi",
+    "defaultTitle": "cryptoi – Crypto Reviews, Complaints & Discussion",
+    "defaultDescription": "Real crypto user experiences, verified reviews & scam warnings. Compare exchanges, wallets, DeFi platforms without the hype. Join the trusted community.",
+    "homeTitle": "cryptoi – Crypto Reviews, Complaints & Discussion",
+    "homeDescription": "Real crypto user experiences, verified reviews & scam warnings. Compare exchanges, wallets, DeFi platforms without the hype.",
+    "complaintsTitle": "Complaints – cryptoi",
+    "complaintsDescription": "View and file complaints about crypto services. Community-driven complaint platform.",
+    "notificationsTitle": "Notifications – cryptoi",
+    "notificationsDescription": "Your notifications",
+    "privacyTitle": "Privacy Policy – cryptoi",
+    "privacyDescription": "How cryptoi handles your data and analytics."
+  },
   "errors": {
     "somethingWentWrong": "Something went wrong",
     "couldNotLoadPage": "We couldn't load this page. Please try again.",

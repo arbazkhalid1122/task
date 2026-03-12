@@ -154,6 +154,19 @@
     "choicesBody": "Sie können Analysen beim Hinweis akzeptieren oder ablehnen. Sie können Ihre Wahl ändern, indem Sie Cookies löschen.",
     "backHome": "Zurück zur Startseite"
   },
+  "metadata": {
+    "siteName": "cryptoi",
+    "defaultTitle": "cryptoi – Krypto-Bewertungen, Beschwerden & Diskussion",
+    "defaultDescription": "Echte Krypto-Nutzererfahrungen, verifizierte Bewertungen und Betrugswarnungen. Vergleichen Sie Börsen, Wallets und DeFi-Plattformen ohne Hype.",
+    "homeTitle": "cryptoi – Krypto-Bewertungen, Beschwerden & Diskussion",
+    "homeDescription": "Echte Krypto-Nutzererfahrungen, verifizierte Bewertungen und Betrugswarnungen.",
+    "complaintsTitle": "Beschwerden – cryptoi",
+    "complaintsDescription": "Beschwerden zu Krypto-Diensten einsehen und einreichen.",
+    "notificationsTitle": "Benachrichtigungen – cryptoi",
+    "notificationsDescription": "Ihre Benachrichtigungen",
+    "privacyTitle": "Datenschutz – cryptoi",
+    "privacyDescription": "So behandelt cryptoi Ihre Daten und Analytics."
+  },
   "errors": {
     "somethingWentWrong": "Etwas ist schiefgelaufen",
     "couldNotLoadPage": "Diese Seite konnte nicht geladen werden. Bitte versuchen Sie es erneut.",

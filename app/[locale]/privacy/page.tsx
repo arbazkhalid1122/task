@@ -1,9 +1,22 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 
-export async function generateMetadata() {
-  const t = await getTranslations("privacy");
-  return { title: t("title") };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+  return {
+    title: t("privacyTitle"),
+    description: t("privacyDescription"),
+    openGraph: {
+      title: t("privacyTitle"),
+      description: t("privacyDescription"),
+    },
+  };
 }
 
 export default async function PrivacyPage() {
