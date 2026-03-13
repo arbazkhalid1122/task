@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useTranslations } from "next-intl";
 import ReviewCard from "@/features/reviews/components/ReviewCard";
 import { useReviewsFeed } from "@/features/reviews/hooks/useReviewsFeed";
 import { useReviewFeed } from "@/features/reviews/contexts/ReviewFeedContext";
@@ -11,10 +10,11 @@ import type { Review } from "@/lib/types";
 
 interface HomeReviewsListProps {
   initialReviews: Review[];
+  /** Pass from server to avoid NextIntl context issues with Suspense + client hydration. */
+  emptyMessage?: string;
 }
 
-export default function HomeReviewsList({ initialReviews }: HomeReviewsListProps) {
-  const t = useTranslations("feed");
+export default function HomeReviewsList({ initialReviews, emptyMessage }: HomeReviewsListProps) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const { registerFeed } = useReviewFeed();
   const { reviews, setReviews, loading, loadingMore, hasMore, loadMore, fetchReviews, updateReviewVote } =
@@ -40,7 +40,7 @@ export default function HomeReviewsList({ initialReviews }: HomeReviewsListProps
           {!hasMore && <FeedEnd />}
         </>
       ) : (
-        <FeedEmpty message={t("emptyReviews")} />
+        <FeedEmpty message={emptyMessage ?? "No reviews yet."} />
       )}
     </>
   );

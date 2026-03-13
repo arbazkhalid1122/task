@@ -31,7 +31,8 @@ async function HomeReviewsAsync() {
   const cookieHeader = cookieStore.toString();
   const authCookieHeader = hasLikelyAuthCookie(cookieHeader) ? cookieHeader : undefined;
   const { reviews } = await getServerReviews({ limit: PAGE_SIZE, cookieHeader: authCookieHeader });
-  return <HomeReviewsList initialReviews={reviews} />;
+  const t = await getTranslations({ namespace: "feed" });
+  return <HomeReviewsList initialReviews={reviews} emptyMessage={t("emptyReviews")} />;
 }
 
 export default function Home() {
