@@ -23,12 +23,14 @@ export function useSidebarProfileSettings(enabled: boolean) {
   const [profileSubmitting, setProfileSubmitting] = useState(false);
   const [profileError, setProfileError] = useState("");
   const [usernameCheckStatus, setUsernameCheckStatus] = useState<UsernameCheckStatus>("idle");
+  const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const usernameCheckIdRef = useRef(0);
+  const usernameSuggestionsIdRef = useRef(0);
 
   useEffect(() => {
     if (!enabled || !user) return;
@@ -60,10 +62,37 @@ export function useSidebarProfileSettings(enabled: boolean) {
         setUsernameCheckStatus("idle");
         return;
       }
-      setUsernameCheckStatus(response.data?.available ? "available" : "taken");
+      const available = response.data?.available ?? false;
+      setUsernameCheckStatus(available ? "available" : "taken");
     }, USERNAME_CHECK_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [enabled, user?.username, profileUsername]);
+
+  useEffect(() => {
+    if (!enabled || !user) return;
+    const raw = profileUsername.trim();
+    if (raw.length === 0) {
+      setUsernameSuggestions([]);
+      return;
+    }
+    if (raw.length < USERNAME_MIN || raw.length > USERNAME_MAX || !USERNAME_REGEX.test(raw)) {
+      setUsernameSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const suggestionId = ++usernameSuggestionsIdRef.current;
+      const response = await authApi.usernameSuggestions(raw);
+      if (suggestionId !== usernameSuggestionsIdRef.current) return;
+      if (response.error) {
+        setUsernameSuggestions([]);
+        return;
+      }
+      setUsernameSuggestions(response.data?.suggestions ?? []);
+    }, USERNAME_CHECK_DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [enabled, user, profileUsername]);
 
   const submitProfile = async (event: React.FormEvent, onSuccess?: () => void) => {
     event.preventDefault();
@@ -162,6 +191,7 @@ export function useSidebarProfileSettings(enabled: boolean) {
     profileSubmitting,
     profileError,
     usernameCheckStatus,
+    usernameSuggestions,
     currentPassword,
     setCurrentPassword,
     newPassword,

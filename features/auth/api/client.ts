@@ -34,4 +34,9 @@ export const authApi = {
     fetchApi<{ available: boolean }>(
       `/auth/check-username?username=${encodeURIComponent(username.trim())}`,
     ),
+
+  usernameSuggestions: async (base: string) =>
+    fetchApi<{ suggestions: string[] }>(
+      `/auth/username-suggestions?base=${encodeURIComponent(base.trim())}`,
+    ),
 };

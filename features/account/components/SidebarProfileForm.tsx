@@ -17,6 +17,7 @@ export default function SidebarProfileForm({ onBack }: SidebarProfileFormProps) 
     profileSubmitting,
     profileError,
     usernameCheckStatus,
+    usernameSuggestions,
     submitProfile,
   } = useSidebarProfileSettings(true);
 
@@ -57,6 +58,20 @@ export default function SidebarProfileForm({ onBack }: SidebarProfileFormProps) 
           )}
           {usernameCheckStatus === "invalid" && profileUsername.trim().length > 0 && (
             <p className="mt-1.5 ml-2 text-xs text-alert-red">{t("profile.usernameInvalid")}</p>
+          )}
+          {usernameSuggestions?.length > 0 && (
+            <div className="mt-2 ml-1 flex flex-wrap gap-2">
+              {usernameSuggestions.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => setProfileUsername(suggestion)}
+                  className="rounded-full border border-[#E5E5E5] px-2.5 py-0.5 text-xs text-text-secondary hover:border-primary hover:text-primary"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
           )}
         </div>
         <div className="mb-3 mt-4">
