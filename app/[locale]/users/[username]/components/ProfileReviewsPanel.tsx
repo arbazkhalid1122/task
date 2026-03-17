@@ -7,6 +7,9 @@ interface ProfileReviewsPanelProps {
   hasMore: boolean;
   loadingMore: boolean;
   onLoadMore: () => void;
+  onVoteUpdate?: (reviewId: string, helpfulCount: number, downVoteCount: number) => void;
+  /** Bulk follow status for review authors; avoids per-card follow-status API calls. */
+  followStatusByUsername?: Record<string, boolean>;
 }
 
 export default function ProfileReviewsPanel({
@@ -15,6 +18,8 @@ export default function ProfileReviewsPanel({
   hasMore,
   loadingMore,
   onLoadMore,
+  onVoteUpdate,
+  followStatusByUsername = {},
 }: ProfileReviewsPanelProps) {
   if (reviews.length === 0) {
     return (
@@ -28,7 +33,17 @@ export default function ProfileReviewsPanel({
   return (
     <>
       {reviews.map((review) => (
-        <ReviewCard key={review.id} review={review} />
+        <ReviewCard
+          key={review.id}
+          review={review}
+          onVoteUpdate={onVoteUpdate}
+          skipFollowStatusFetch
+          isFollowingAuthor={
+            review.author?.username !== undefined
+              ? followStatusByUsername[review.author.username]
+              : false
+          }
+        />
       ))}
       {hasMore && (
         <div className="flex justify-center pt-2">

@@ -3,25 +3,13 @@
 import { useEffect, useState } from "react";
 import { trendingApi } from "@/features/trending/api/client";
 import { truncateWithEllipsis } from "@/shared/utils/text";
+import type { SidebarTopRatedCard } from "@/features/layout/hooks/useTopRatedCards";
 
-export interface SidebarTopRatedCard {
-  title: string;
-  product: {
-    name: string;
-    score: string;
-    reviews: string;
-    companies: string;
-    badge: { text: string; color: string };
-    description: string;
-    bgColor: string;
-    textColor: string;
-    scoreColor: string;
-    separatorColor: string;
-    hasVerify?: boolean;
-  };
-}
-
-export function useTopRatedCards() {
+/**
+ * Right-sidebar "Trending" cards, rendered with the same `TopRatedCard` component
+ * to avoid any design changes.
+ */
+export function useTrendingCards() {
   const [cards, setCards] = useState<SidebarTopRatedCard[]>([]);
 
   useEffect(() => {
@@ -32,24 +20,12 @@ export function useTopRatedCards() {
       cancelIdleCallback?: (id: number) => void;
     };
 
-    const loadTopRated = async () => {
+    const loadTrending = async () => {
       const response = await trendingApi.get({ period: "week", limit: 2 });
-      if (!active || response.error || !response.data) {
-        return;
-      }
-      const data = response.data;
-      const source =
-        data.topRatedThisWeek?.length > 0
-          ? data.topRatedThisWeek
-          : data.trendingNow?.length > 0
-            ? data.trendingNow
-            : [];
-      if (source.length === 0) {
-        return;
-      }
+      if (!active || response.error || !response.data?.trendingNow?.length) return;
 
-      const nextCards = source.slice(0, 2).map((item, index) => ({
-        title: "Top rated this week",
+      const nextCards = response.data.trendingNow.slice(0, 2).map((item, index) => ({
+        title: "Trending now",
         product: {
           name: truncateWithEllipsis(item.name, 26),
           score: `${item.averageScore.toFixed(1)}/10`,
@@ -57,8 +33,8 @@ export function useTopRatedCards() {
           companies: "1",
           badge:
             index === 0
-              ? { text: "Rising", color: "bg-accent-blue" }
-              : { text: "New", color: "bg-alert-orange-light" },
+              ? { text: "Trending", color: "bg-primary" }
+              : { text: "Hot", color: "bg-alert-orange" },
           description: truncateWithEllipsis(item.description || item.name, 92),
           bgColor: index === 0 ? "bg-dark-card" : "bg-card-purple-light-bg",
           textColor: index === 0 ? "text-white" : "text-text-dark",
@@ -73,12 +49,12 @@ export function useTopRatedCards() {
 
     if (typeof idleWindow.requestIdleCallback === "function") {
       timerId = idleWindow.requestIdleCallback(() => {
-        void loadTopRated();
-      }, { timeout: 1400 });
+        void loadTrending();
+      }, { timeout: 1500 });
     } else {
       timerId = globalThis.setTimeout(() => {
-        void loadTopRated();
-      }, 450);
+        void loadTrending();
+      }, 500);
     }
 
     return () => {
@@ -95,3 +71,4 @@ export function useTopRatedCards() {
 
   return cards;
 }
+

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import ReviewCard from "@/features/reviews/components/ReviewCard";
 import { useReviewsFeed } from "@/features/reviews/hooks/useReviewsFeed";
+import { useReviewAuthorsFollowStatus } from "@/features/reviews/hooks/useReviewAuthorsFollowStatus";
 import { useReviewFeed } from "@/features/reviews/contexts/ReviewFeedContext";
 import { FeedEmpty, FeedEnd, FeedLoading, FeedLoadMore } from "@/shared/components/feed";
 import { useInfiniteScroll } from "@/shared/hooks/useInfiniteScroll";
@@ -19,6 +20,7 @@ export default function HomeReviewsList({ initialReviews, emptyMessage }: HomeRe
   const { registerFeed } = useReviewFeed();
   const { reviews, setReviews, loading, loadingMore, hasMore, loadMore, fetchReviews, updateReviewVote } =
     useReviewsFeed(initialReviews);
+  const followStatusByUsername = useReviewAuthorsFollowStatus(reviews);
 
   useEffect(() => {
     registerFeed({ setReviews, fetchReviews });
@@ -33,7 +35,17 @@ export default function HomeReviewsList({ initialReviews, emptyMessage }: HomeRe
       ) : reviews.length > 0 ? (
         <>
           {reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} onVoteUpdate={updateReviewVote} />
+            <ReviewCard
+              key={review.id}
+              review={review}
+              onVoteUpdate={updateReviewVote}
+              skipFollowStatusFetch
+              isFollowingAuthor={
+                review.author?.username !== undefined
+                  ? followStatusByUsername[review.author.username]
+                  : false
+              }
+            />
           ))}
           <div ref={sentinelRef} className="min-h-4" aria-hidden />
           {loadingMore && <FeedLoadMore />}

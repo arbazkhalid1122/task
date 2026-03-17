@@ -332,11 +332,16 @@ body {
   background-color: var(--color-bg-white);
   width: 2.5rem;
   height: 2.5rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  contain: layout;
 }
 
 .avatar-sm {
   width: 2rem;
   height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
 }
 
 .avatar-lg {

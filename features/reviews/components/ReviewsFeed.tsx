@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { FeedEmpty, FeedEnd, FeedLoading, FeedLoadMore } from "@/shared/components/feed";
 import ReviewCard from "@/features/reviews/components/ReviewCard";
 import { useReviewsFeed } from "@/features/reviews/hooks/useReviewsFeed";
+import { useReviewAuthorsFollowStatus } from "@/features/reviews/hooks/useReviewAuthorsFollowStatus";
 import { useInfiniteScroll } from "@/shared/hooks/useInfiniteScroll";
 import type { Review } from "@/lib/types";
 
@@ -16,6 +17,7 @@ export default function ReviewsFeed({ initialReviews }: ReviewsFeedProps) {
   const t = useTranslations("feed");
   const sentinelRef = useRef<HTMLDivElement>(null);
   const { reviews, loading, loadingMore, hasMore, loadMore, updateReviewVote } = useReviewsFeed(initialReviews);
+  const followStatusByUsername = useReviewAuthorsFollowStatus(reviews);
 
   useInfiniteScroll(sentinelRef, { hasMore, loading, loadingMore, loadMore });
 
@@ -30,7 +32,17 @@ export default function ReviewsFeed({ initialReviews }: ReviewsFeedProps) {
   return (
     <>
       {reviews.map((review, index) => (
-        <ReviewCard key={review.id || index} review={review} onVoteUpdate={updateReviewVote} />
+        <ReviewCard
+          key={review.id || index}
+          review={review}
+          onVoteUpdate={updateReviewVote}
+          skipFollowStatusFetch
+          isFollowingAuthor={
+            review.author?.username !== undefined
+              ? followStatusByUsername[review.author.username]
+              : false
+          }
+        />
       ))}
       <div ref={sentinelRef} className="min-h-4" aria-hidden />
       {loadingMore && <FeedLoadMore />}

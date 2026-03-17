@@ -1,14 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { usersApi } from "@/features/users/api/client";
-import { useUserProfileData } from "@/features/users/hooks/useUserProfileData";
+import {
+  useProfileQueries,
+  useFollowersQuery,
+  useFollowingQuery,
+  useFollowStatusBulkQuery,
+} from "@/features/users/hooks/useProfileQueries";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { formatJoined, getActivitySummary } from "@/features/users/utils/profileActivity";
 import UserProfileSkeleton from "@/shared/components/ui/UserProfileSkeleton";
-import type { Author } from "@/lib/types";
+import { queryKeys } from "@/lib/queryKeys";
 import {
   type TabId,
   ProfileHeader,
@@ -26,6 +32,7 @@ interface UserProfilePageClientProps {
 }
 
 export default function UserProfilePageClient({ username }: UserProfilePageClientProps) {
+  const queryClient = useQueryClient();
   const { isLoggedIn, user: currentUser } = useAuth();
   const {
     user,
@@ -41,56 +48,64 @@ export default function UserProfilePageClient({ username }: UserProfilePageClien
     toggleFollow,
     loadMoreReviews,
     loadMoreComplaints,
-  } = useUserProfileData(username);
+    updateReviewVote,
+    updateComplaintVote,
+  } = useProfileQueries(username);
   const router = useRouter();
   const pathname = usePathname();
   const locale = pathname.split("/")[1] || "en";
   const { showToast } = useToast();
 
   const [activeTab, setActiveTab] = useState<TabId>("reviews");
-  const [followers, setFollowers] = useState<Author[]>([]);
-  const [following, setFollowing] = useState<Author[]>([]);
-  const [loadingRelations, setLoadingRelations] = useState(false);
-  const [followStatusByUsername, setFollowStatusByUsername] = useState<Record<string, boolean>>({});
   const [followHoverUnfollow, setFollowHoverUnfollow] = useState(false);
 
-  useEffect(() => {
-    if (!username || (activeTab !== "followers" && activeTab !== "following")) return;
-    let cancelled = false;
-    setLoadingRelations(true);
-    if (activeTab === "followers") {
-      usersApi.followers(username).then((res) => {
-        if (!cancelled && !res.error && res.data) setFollowers(res.data.users);
-        setLoadingRelations(false);
-      });
-    } else {
-      usersApi.following(username).then((res) => {
-        if (!cancelled && !res.error && res.data) setFollowing(res.data.users);
-        setLoadingRelations(false);
-      });
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [activeTab, username]);
+  const followersQuery = useFollowersQuery(username, activeTab === "followers");
+  const followingQuery = useFollowingQuery(username, activeTab === "following");
+  const followers = followersQuery.data ?? [];
+  const following = followingQuery.data ?? [];
+  const loadingRelations = activeTab === "followers" ? followersQuery.isLoading : followingQuery.isLoading;
 
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    const list = activeTab === "followers" ? followers : activeTab === "following" ? following : [];
-    const usernames = list.map((u) => u.username).filter(Boolean);
-    if (usernames.length === 0) return;
-    usersApi.getFollowStatusBulk(usernames).then((res) => {
-      if (!res.error && res.data) setFollowStatusByUsername(res.data.following);
-    });
-  }, [activeTab, isLoggedIn, followers, following]);
+  const relationUsernames = activeTab === "followers"
+    ? followers.map((u) => u.username).filter(Boolean)
+    : following.map((u) => u.username).filter(Boolean);
+  const followStatusQuery = useFollowStatusBulkQuery(
+    relationUsernames,
+    (activeTab === "followers" || activeTab === "following") && relationUsernames.length > 0,
+    currentUser?.id ?? null
+  );
+
+  const reviewAuthorUsernames = useMemo(
+    () => [...new Set(reviews.map((r) => r.author?.username).filter(Boolean))] as string[],
+    [reviews]
+  );
+  const reviewAuthorsFollowQuery = useFollowStatusBulkQuery(
+    reviewAuthorUsernames,
+    activeTab === "reviews" && reviewAuthorUsernames.length > 0,
+    currentUser?.id ?? null
+  );
+
+  const followStatusByUsername =
+    activeTab === "reviews"
+      ? (reviewAuthorsFollowQuery.data?.following ?? {})
+      : (followStatusQuery.data?.following ?? {});
 
   const handleFollowRow = async (targetUsername: string, currentlyFollowing: boolean) => {
     if (currentlyFollowing) {
       const res = await usersApi.unfollow(targetUsername);
-      if (!res.error) setFollowStatusByUsername((prev) => ({ ...prev, [targetUsername]: false }));
+      if (!res.error) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.profile(username) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.profileFollowers(username) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.profileFollowing(username) });
+        queryClient.invalidateQueries({ queryKey: ["follow-status-bulk"] });
+      }
     } else {
       const res = await usersApi.follow(targetUsername);
-      if (!res.error) setFollowStatusByUsername((prev) => ({ ...prev, [targetUsername]: true }));
+      if (!res.error) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.profile(username) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.profileFollowers(username) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.profileFollowing(username) });
+        queryClient.invalidateQueries({ queryKey: ["follow-status-bulk"] });
+      }
     }
   };
 
@@ -157,15 +172,15 @@ export default function UserProfilePageClient({ username }: UserProfilePageClien
     return null;
   }
 
-  if (loading) {
-    return <UserProfileSkeleton />;
-  }
-
   const profileUser = user as (typeof user) & { createdAt?: string };
   const joinedStr = formatJoined(profileUser?.createdAt);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pt-8 sm:pt-12 lg:pt-16">
+    <div className="mx-auto max-w-4xl px-4 pt-8 sm:pt-12 lg:pt-16 pb-16">
+      {loading ? (
+        <UserProfileSkeleton />
+      ) : (
+    <>
       <div className="card-base">
         <ProfileHeader
           user={user!}
@@ -181,7 +196,7 @@ export default function UserProfilePageClient({ username }: UserProfilePageClien
         {stats && <ProfileStatsRow stats={stats} onTabChange={switchTab} />}
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 min-h-[420px]">
         <ProfileTabList tabs={tabs} activeTab={activeTab} onTabChange={switchTab} />
 
         <div
@@ -206,6 +221,8 @@ export default function UserProfilePageClient({ username }: UserProfilePageClien
               }
               loadingMore={loadingMoreReviews}
               onLoadMore={loadMoreReviews}
+              onVoteUpdate={updateReviewVote}
+              followStatusByUsername={followStatusByUsername}
             />
           )}
         </div>
@@ -284,6 +301,8 @@ export default function UserProfilePageClient({ username }: UserProfilePageClien
           )}
         </div>
       </div>
+    </>
+      )}
     </div>
   );
 }

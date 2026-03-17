@@ -30,9 +30,9 @@ export default function TopRatedCard({ card, index }: TopRatedCardProps) {
   return (
     <div className={`rounded-t-md mb-2 rounded-b-md border border-border-light text-white overflow-hidden min-h-[248px] ${index === 0 ? 'bg-dark-bg' : 'bg-white'}`}>
       <div className="flex items-center justify-between px-4 py-5 bg-dark-bg">
-        <h3 className="text-sm font-semibold">{t('topRated.topRatedThisWeek')}</h3>
+        <h3 className="text-sm font-semibold">{card.title || t('topRated.topRatedThisWeek')}</h3>
       </div>
-      <div className={`space-y-2 p-3 ${card.product.bgColor} rounded-md`}>
+      <div className={`space-y-2 p-3 ${card.product.bgColor} `}>
         <div className="flex items-start sm:items-center w-full gap-4">
           <div className="flex items-center gap-2 flex-col flex-shrink-0">
             <div className="h-10 w-10 rounded-md border border-primary-border bg-bg-white" />
@@ -41,14 +41,14 @@ export default function TopRatedCard({ card, index }: TopRatedCardProps) {
             </div>
           </div>
           <div className={`rounded-md flex flex-col gap-1 text-sm font-bold ${card.product.textColor} ${index === 1 ? 'flex-1 min-w-0' : 'min-w-0'}`}>
-            {index === 1 ? (
+            {/* {index === 1 ? (
               <div className="flex items-center justify-between w-full gap-2">
                 <span className="break-words">{card.product.name}</span>
                 <Image src="/verify.svg" alt="arrow-right" width={20} height={20} className="flex-shrink-0" />
               </div>
             ) : (
               <div className="break-words">{card.product.name}</div>
-            )}
+            )} */}
             <span className={`text-lg ${card.product.scoreColor} font-bold leading-[14px] tracking-normal sm:mr-4`}>
               {card.product.score}
             </span>

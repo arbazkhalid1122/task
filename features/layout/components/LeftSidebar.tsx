@@ -32,18 +32,15 @@ export default function LeftSidebar() {
       if (!isMounted) {
         return;
       }
-      if (response.error || !response.data?.trendingNow?.length) {
-        setSidebarAlerts((prev) =>
-          prev.map((item) =>
-            item.type === "trending"
-              ? { ...item, content: "" }
-              : item
-          )
-        );
+      if (response.error || !response.data) {
         return;
       }
 
-      const trendingItem = response.data.trendingNow[0];
+      const data = response.data;
+      const trendingItem =
+        data.trendingNow?.[0] ?? data.topRatedThisWeek?.[0] ?? null;
+      if (!trendingItem) return;
+
       setSidebarAlerts((prev) =>
         prev.map((item) =>
           item.type === "trending"

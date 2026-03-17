@@ -10,12 +10,12 @@ const RATING_STAR_COUNT = 5;
 const REVIEW_CONTENT_LINES = 3;
 const META_ITEM_WIDTHS = ["w-24", "w-20", "w-14", "w-14"] as const;
 
+/** Inner content only; parent should use same wrapper as real profile for stable CLS. */
 export default function UserProfileSkeleton() {
   return (
-    <div className="min-h-screen w-full animate-pulse">
-      <div className="mx-auto max-w-4xl px-4 pt-8 sm:pt-12 lg:pt-16 pb-16">
-        {/* Profile card skeleton */}
-        <div className="card-base">
+    <div className="min-h-[70vh] w-full animate-pulse" aria-hidden>
+      {/* Profile card skeleton */}
+      <div className="card-base">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <Skeleton variant="circle" className="h-14 w-14 flex-shrink-0" />
@@ -83,7 +83,6 @@ export default function UserProfileSkeleton() {
             ))}
           </div>
         </div>
-      </div>
     </div>
   );
 }

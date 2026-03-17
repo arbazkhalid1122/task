@@ -1,19 +1,18 @@
-'use client';
+"use client";
 
-import { SessionProvider } from 'next-auth/react';
-import { ToastProvider } from '@/lib/contexts/ToastContext';
-import { AuthProvider } from '@/lib/contexts/AuthContext';
+import { SessionProvider } from "next-auth/react";
+import { ToastProvider } from "@/lib/contexts/ToastContext";
+import { AuthProvider } from "@/lib/contexts/AuthContext";
+import QueryProvider from "@/app/QueryProvider";
 
-export default function Providers({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
-      <ToastProvider>
-        <AuthProvider>{children}</AuthProvider>
-      </ToastProvider>
+      <QueryProvider>
+        <ToastProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ToastProvider>
+      </QueryProvider>
     </SessionProvider>
   );
 }

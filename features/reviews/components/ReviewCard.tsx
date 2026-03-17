@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { LuDot } from "react-icons/lu";
 import { useTranslations } from "next-intl";
@@ -22,9 +23,19 @@ import type { Review } from "@/lib/types";
 interface ReviewCardProps {
   review: Review;
   onVoteUpdate?: (reviewId: string, helpfulCount: number, downVoteCount: number) => void;
+  /** When true, follow state comes only from isFollowingAuthor (e.g. bulk on profile); no per-card API call. */
+  skipFollowStatusFetch?: boolean;
+  /** When skipFollowStatusFetch is true, use this as the follow state for the review author. */
+  isFollowingAuthor?: boolean;
 }
 
-export default function ReviewCard({ review, onVoteUpdate }: ReviewCardProps) {
+export default function ReviewCard({
+  review,
+  onVoteUpdate,
+  skipFollowStatusFetch = false,
+  isFollowingAuthor: isFollowingAuthorProp,
+}: ReviewCardProps) {
+  const queryClient = useQueryClient();
   const t = useTranslations();
   const { helpfulCount, downVoteCount, isUpVoted, isDownVoted, handleVote } = useVote({
     entityId: review.id,
@@ -60,27 +71,39 @@ export default function ReviewCard({ review, onVoteUpdate }: ReviewCardProps) {
   const { user: currentUser } = useAuth();
   const isOwnReview = currentUser?.username && review.author?.username === currentUser.username;
   const canFollow = Boolean(currentUser && review.author?.username && !isOwnReview);
-  const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
+  const [isFollowingAuthorLocal, setIsFollowingAuthorLocal] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
 
+  const isFollowingAuthor = skipFollowStatusFetch
+    ? Boolean(isFollowingAuthorProp)
+    : typeof isFollowingAuthorProp === "boolean"
+      ? isFollowingAuthorProp
+      : isFollowingAuthorLocal;
+
   useEffect(() => {
-    if (!canFollow || !review.author?.username) return;
+    if (skipFollowStatusFetch || !canFollow || !review.author?.username) return;
     usersApi.getFollowStatus(review.author.username).then((res) => {
-      if (!res.error && res.data) setIsFollowingAuthor(res.data.following);
+      if (!res.error && res.data) setIsFollowingAuthorLocal(res.data.following);
     });
-  }, [canFollow, review.author?.username]);
+  }, [canFollow, review.author?.username, skipFollowStatusFetch]);
 
   const handleFollowClick = () => {
     if (!review.author?.username || followLoading) return;
     setFollowLoading(true);
     if (isFollowingAuthor) {
       usersApi.unfollow(review.author.username).then((res) => {
-        if (!res.error) setIsFollowingAuthor(false);
+        if (!res.error) {
+          setIsFollowingAuthorLocal(false);
+          if (skipFollowStatusFetch) queryClient.invalidateQueries({ queryKey: ["follow-status-bulk"] });
+        }
         setFollowLoading(false);
       });
     } else {
       usersApi.follow(review.author.username).then((res) => {
-        if (!res.error) setIsFollowingAuthor(true);
+        if (!res.error) {
+          setIsFollowingAuthorLocal(true);
+          if (skipFollowStatusFetch) queryClient.invalidateQueries({ queryKey: ["follow-status-bulk"] });
+        }
         setFollowLoading(false);
       });
     }

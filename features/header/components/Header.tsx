@@ -13,12 +13,13 @@ export default function Header() {
   const displayName = user?.username || t("common.greeting.companyname");
 
   return (
-    <header className="w-full overflow-visible border-b border-border">
+    <header className="min-h-[52px] sm:min-h-[60px] w-full overflow-visible border-b border-border" role="banner">
       <div className="header-inner overflow-visible">
         <Link href="/" className="header-brand hover:opacity-90 transition-opacity">
           {t("header.title")}
         </Link>
         <HeaderSearch />
+        <div className="flex min-w-[140px] shrink-0 items-center justify-end gap-3">
         {isLoggedIn ? (
           <NotificationsMenu displayName={displayName} enabled={isLoggedIn} />
         ) : (
@@ -36,6 +37,7 @@ export default function Header() {
             </button>
           </div>
         )}
+        </div>
       </div>
     </header>
   );
