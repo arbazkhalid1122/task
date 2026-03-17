@@ -1,7 +1,16 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import AppShell from "@/features/layout/components/AppShell";
-import { getServerUserProfile } from "@/lib/server-api";
+import {
+  getServerUserProfileFull,
+  getServerProfileReviews,
+  getServerProfileComplaints,
+} from "@/lib/server-api";
+import { getQueryClient } from "@/lib/queryClient";
+import { queryKeys } from "@/lib/queryKeys";
 import UserProfilePageClient from "./UserProfilePageClient";
 
 interface PageProps {
@@ -15,7 +24,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const fallbackDescription = t("homeDescription");
 
   try {
-    const { user } = await getServerUserProfile(username);
+    const cookieStore = await cookies();
+    const profile = await getServerUserProfileFull(username, cookieStore.toString());
+    const user = profile?.user ?? null;
     const title = user
       ? `@${user.username}${user.bio?.trim() ? ` – ${user.bio.slice(0, 50)}${user.bio.length > 50 ? "…" : ""}` : ""}`
       : fallbackTitle;
@@ -56,9 +67,55 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function UserProfilePage({ params }: PageProps) {
   const { username } = await params;
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.toString();
+  const queryClient = getQueryClient();
+
+  // SSR: fetch profile (may be cached from generateMetadata) + first page of reviews + complaints in parallel
+  const [profileData, reviewsData, complaintsData] = await Promise.all([
+    getServerUserProfileFull(username, cookieHeader),
+    getServerProfileReviews(username, { page: 1 }),
+    getServerProfileComplaints(username, { page: 1 }),
+  ]);
+
+  if (!profileData?.user) {
+    notFound();
+  }
+
+  // Prime React Query cache for instant client hydration (no loading flash)
+  queryClient.setQueryData(queryKeys.profile(username), profileData);
+  queryClient.setQueryData(
+    [...queryKeys.profileReviews(username)],
+    {
+      pages: [
+        {
+          reviews: reviewsData.reviews,
+          pagination: reviewsData.pagination,
+        },
+      ],
+      pageParams: [1],
+    }
+  );
+  queryClient.setQueryData(
+    [...queryKeys.profileComplaints(username)],
+    {
+      pages: [
+        {
+          complaints: complaintsData.complaints,
+          pagination: complaintsData.pagination,
+        },
+      ],
+      pageParams: [1],
+    }
+  );
+
+  const dehydratedState = dehydrate(queryClient);
+
   return (
     <AppShell>
-      <UserProfilePageClient username={username} />
+      <HydrationBoundary state={dehydratedState}>
+        <UserProfilePageClient username={username} />
+      </HydrationBoundary>
     </AppShell>
   );
 }

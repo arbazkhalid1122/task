@@ -1,9 +1,9 @@
 export const queryKeys = {
   profile: (username: string) => ["profile", username] as const,
   profileReviews: (username: string, page?: number) =>
-    (page !== undefined ? ["profile-reviews", username, page] : ["profile-reviews", username]) as const,
+    ["profile-reviews", username, page ?? null] as const,
   profileComplaints: (username: string, page?: number) =>
-    (page !== undefined ? ["profile-complaints", username, page] : ["profile-complaints", username]) as const,
+    ["profile-complaints", username, page ?? null] as const,
   profileFollowers: (username: string) => ["profile-followers", username] as const,
   profileFollowing: (username: string) => ["profile-following", username] as const,
   followStatusBulk: (viewerId: string | null, usernames: string[]) =>
