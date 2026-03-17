@@ -50,7 +50,10 @@ export default function UserProfilePageClient({ username }: UserProfilePageClien
     loadMoreComplaints,
     updateReviewVote,
     updateComplaintVote,
-  } = useProfileQueries(username);
+  } = useProfileQueries(username, {
+    // Waterfall: only fetch reviews/complaints after profile is loaded so LCP (profile card) isn't blocked.
+    enableListsAfterProfile: true,
+  });
   const router = useRouter();
   const pathname = usePathname();
   const locale = pathname.split("/")[1] || "en";
@@ -59,8 +62,8 @@ export default function UserProfilePageClient({ username }: UserProfilePageClien
   const [activeTab, setActiveTab] = useState<TabId>("reviews");
   const [followHoverUnfollow, setFollowHoverUnfollow] = useState(false);
 
-  const followersQuery = useFollowersQuery(username, activeTab === "followers");
-  const followingQuery = useFollowingQuery(username, activeTab === "following");
+  const followersQuery = useFollowersQuery(username, !!user && activeTab === "followers");
+  const followingQuery = useFollowingQuery(username, !!user && activeTab === "following");
   const followers = followersQuery.data ?? [];
   const following = followingQuery.data ?? [];
   const loadingRelations = activeTab === "followers" ? followersQuery.isLoading : followingQuery.isLoading;
@@ -70,7 +73,9 @@ export default function UserProfilePageClient({ username }: UserProfilePageClien
     : following.map((u) => u.username).filter(Boolean);
   const followStatusQuery = useFollowStatusBulkQuery(
     relationUsernames,
-    (activeTab === "followers" || activeTab === "following") && relationUsernames.length > 0,
+    !!user &&
+      (activeTab === "followers" || activeTab === "following") &&
+      relationUsernames.length > 0,
     currentUser?.id ?? null
   );
 
@@ -80,7 +85,7 @@ export default function UserProfilePageClient({ username }: UserProfilePageClien
   );
   const reviewAuthorsFollowQuery = useFollowStatusBulkQuery(
     reviewAuthorUsernames,
-    activeTab === "reviews" && reviewAuthorUsernames.length > 0,
+    !!user && activeTab === "reviews" && reviewAuthorUsernames.length > 0,
     currentUser?.id ?? null
   );
 

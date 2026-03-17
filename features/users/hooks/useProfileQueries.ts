@@ -30,7 +30,16 @@ export interface ComplaintsPagination {
   totalPages: number;
 }
 
-export function useProfileQueries(username: string) {
+export function useProfileQueries(
+  username: string,
+  options?: {
+    /**
+     * When true, loads reviews/complaints only after profile has loaded (waterfall).
+     * Improves LCP by not competing with the profile request.
+     */
+    enableListsAfterProfile?: boolean;
+  },
+) {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { isLoggedIn } = useAuth();
@@ -47,6 +56,9 @@ export function useProfileQueries(username: string) {
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
   });
+
+  const profileLoaded = !!profileQuery.data;
+  const enableLists = options?.enableListsAfterProfile ? profileLoaded : true;
 
   const reviewsInfinite = useInfiniteQuery({
     queryKey: [...queryKeys.profileReviews(username)],
@@ -68,7 +80,7 @@ export function useProfileQueries(username: string) {
       if (!p || p.page >= p.totalPages) return undefined;
       return p.page + 1;
     },
-    enabled: !!username,
+    enabled: !!username && enableLists,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
   });
@@ -93,7 +105,7 @@ export function useProfileQueries(username: string) {
       if (!p || p.page >= p.totalPages) return undefined;
       return p.page + 1;
     },
-    enabled: !!username,
+    enabled: !!username && enableLists,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
   });
