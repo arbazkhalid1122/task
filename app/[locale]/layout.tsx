@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import Providers from '@/app/providers';
+import ServerProviders from '@/app/ServerProviders';
 import DeferredExtras from '@/app/[locale]/DeferredExtras';
 import "../globals.css";
 
@@ -57,11 +57,11 @@ export default async function LocaleLayout({
     analyticsConsentValue === "true" ? true : analyticsConsentValue === "false" ? false : null;
 
   return (
-    <Providers>
+    <ServerProviders>
       <NextIntlClientProvider messages={messages}>
         {children}
         <DeferredExtras initialAnalyticsConsent={initialAnalyticsConsent} />
       </NextIntlClientProvider>
-    </Providers>
+    </ServerProviders>
   );
 }
