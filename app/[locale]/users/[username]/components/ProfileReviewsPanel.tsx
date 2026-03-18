@@ -26,7 +26,7 @@ export default function ProfileReviewsPanel({
   followStatusByUsername = {},
 }: ProfileReviewsPanelProps) {
   if (loading) {
-    return <ProfileListSkeleton />;
+    return <ProfileListSkeleton variant="review" />;
   }
 
   if (reviews.length === 0) {

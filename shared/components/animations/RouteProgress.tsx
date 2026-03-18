@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "@/i18n/routing";
 
 type Phase = "idle" | "starting" | "finishing";
@@ -9,25 +9,47 @@ export default function RouteProgress() {
   const pathname = usePathname();
   const prevPathRef = useRef<string | null>(null);
   const navigatingRef = useRef(false);
+  const stepTimerRef = useRef<number | null>(null);
+  const finishTimerRef = useRef<number | null>(null);
+  const routeCommitTimerRef = useRef<number | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [width, setWidth] = useState(0);
 
-  const start = () => {
+  const clearTimers = useCallback(() => {
+    if (stepTimerRef.current !== null) {
+      window.clearTimeout(stepTimerRef.current);
+      stepTimerRef.current = null;
+    }
+    if (finishTimerRef.current !== null) {
+      window.clearTimeout(finishTimerRef.current);
+      finishTimerRef.current = null;
+    }
+    if (routeCommitTimerRef.current !== null) {
+      window.clearTimeout(routeCommitTimerRef.current);
+      routeCommitTimerRef.current = null;
+    }
+  }, []);
+
+  const start = useCallback(() => {
+    clearTimers();
     navigatingRef.current = true;
     setPhase("starting");
-    setWidth(12);
-    globalThis.setTimeout(() => setWidth(72), 120);
-  };
+    setWidth(8);
+    stepTimerRef.current = window.setTimeout(() => setWidth(32), 90);
+    finishTimerRef.current = window.setTimeout(() => setWidth(88), 260);
+  }, [clearTimers]);
 
-  const finish = () => {
+  const finish = useCallback(() => {
+    clearTimers();
     setPhase("finishing");
     setWidth(100);
-    globalThis.setTimeout(() => {
+    finishTimerRef.current = window.setTimeout(() => {
       setPhase("idle");
       setWidth(0);
       navigatingRef.current = false;
-    }, 260);
-  };
+      finishTimerRef.current = null;
+    }, 180);
+  }, [clearTimers]);
 
   // Start progress immediately on internal link clicks (feels much smoother).
   useEffect(() => {
@@ -54,7 +76,7 @@ export default function RouteProgress() {
 
     document.addEventListener("click", onClickCapture, true);
     return () => document.removeEventListener("click", onClickCapture, true);
-  }, [pathname]);
+  }, [pathname, start]);
 
   useEffect(() => {
     const prev = prevPathRef.current;
@@ -63,13 +85,17 @@ export default function RouteProgress() {
 
     // Route committed → finish the bar quickly.
     if (navigatingRef.current) {
-      finish();
+      routeCommitTimerRef.current = window.setTimeout(() => finish(), 0);
     } else {
       // Back/forward or programmatic nav
-      start();
-      globalThis.setTimeout(() => finish(), 220);
+      routeCommitTimerRef.current = window.setTimeout(() => {
+        start();
+        finishTimerRef.current = window.setTimeout(() => finish(), 180);
+      }, 0);
     }
-  }, [pathname]);
+  }, [finish, pathname, start]);
+
+  useEffect(() => clearTimers, [clearTimers]);
 
   const visible = phase !== "idle";
 
@@ -85,7 +111,7 @@ export default function RouteProgress() {
         pointerEvents: "none",
         zIndex: 9999,
         opacity: visible ? 1 : 0,
-        transition: "opacity 120ms ease-out",
+        transition: "opacity 150ms ease-out",
       }}
     >
       <div
@@ -96,12 +122,11 @@ export default function RouteProgress() {
           boxShadow: "0 0 12px rgba(37, 99, 235, 0.35)",
           transition:
             phase === "finishing"
-              ? "width 180ms ease-out"
-              : "width 260ms ease-out",
+              ? "width 160ms cubic-bezier(0.22, 1, 0.36, 1)"
+              : "width 220ms cubic-bezier(0.22, 1, 0.36, 1)",
           willChange: "width",
         }}
       />
     </div>
   );
 }
-

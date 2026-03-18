@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { usePathname } from "@/i18n/routing";
+import RightSidebarLoading from "@/features/layout/components/RightSidebarLoading";
 import TopRatedCard from "@/shared/components/layout/TopRatedCard";
 import SidebarAuthCard from "@/features/account/components/SidebarAuthCard";
 import SidebarHelpPanel from "@/features/account/components/SidebarHelpPanel";
@@ -10,7 +11,6 @@ import SidebarPasswordForm from "@/features/account/components/SidebarPasswordFo
 import SidebarProfileForm from "@/features/account/components/SidebarProfileForm";
 import { useRightSidebarCards } from "@/features/layout/hooks/useRightSidebarCards";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import Skeleton from "@/shared/components/ui/Skeleton";
 
 type SidebarView = "help" | "edit-profile" | "change-password";
 
@@ -19,7 +19,7 @@ export default function RightSidebar() {
   const reduceMotion = useReducedMotion();
   const pathname = usePathname();
   const controls = useAnimationControls();
-  const cards = useRightSidebarCards();
+  const { cards, loading: cardsLoading } = useRightSidebarCards();
   const [sidebarView, setSidebarView] = useState<SidebarView>("help");
 
   useEffect(() => {
@@ -54,34 +54,7 @@ export default function RightSidebar() {
           style={{ willChange: reduceMotion ? undefined : "transform, opacity" }}
         >
           {isAuthLoading ? (
-            <div className="mt-4">
-              <div className="card-base z-10 mt-4 border border-[#E5E5E5] p-5">
-                <Skeleton className="h-4 w-32" />
-                <div className="mt-3 space-y-2">
-                  <Skeleton className="h-3 w-56" />
-                  <Skeleton className="h-3 w-44" />
-                </div>
-                <div className="mt-4">
-                  <Skeleton className="h-10 w-full rounded" />
-                </div>
-                <div className="mt-5 space-y-3">
-                  <div>
-                    <Skeleton className="mb-2 h-3 w-28" />
-                    <Skeleton className="h-10 w-full rounded" />
-                  </div>
-                  <div>
-                    <Skeleton className="mb-2 h-3 w-24" />
-                    <Skeleton className="h-10 w-full rounded" />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <Skeleton className="h-10 w-full rounded" />
-                </div>
-              </div>
-              <div className="sidebar-right-panel">
-                <Skeleton className="mx-auto h-3 w-48" />
-              </div>
-            </div>
+            <RightSidebarLoading />
           ) : isLoggedIn ? (
             sidebarView === "edit-profile" ? (
               <SidebarProfileForm onBack={() => setSidebarView("help")} />
@@ -99,9 +72,13 @@ export default function RightSidebar() {
         </motion.div>
       </AnimatePresence>
 
-      {cards.map((card, index) => (
-        <TopRatedCard key={`${card.title}-${card.product.name}-${index}`} card={card} index={index} />
-      ))}
+      {cardsLoading ? (
+        <RightSidebarLoading withAuthCard={false} />
+      ) : (
+        cards.map((card, index) => (
+          <TopRatedCard key={`${card.title}-${card.product.name}-${index}`} card={card} index={index} />
+        ))
+      )}
     </motion.aside>
   );
 }

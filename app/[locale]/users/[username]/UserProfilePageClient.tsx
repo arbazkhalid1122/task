@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { usersApi } from "@/features/users/api/client";
@@ -34,6 +35,7 @@ interface UserProfilePageClientProps {
 export default function UserProfilePageClient({ username }: UserProfilePageClientProps) {
   const queryClient = useQueryClient();
   const { isLoggedIn, user: currentUser } = useAuth();
+  const reduceMotion = useReducedMotion();
   const {
     user,
     stats,
@@ -51,7 +53,6 @@ export default function UserProfilePageClient({ username }: UserProfilePageClien
     loadMoreReviews,
     loadMoreComplaints,
     updateReviewVote,
-    updateComplaintVote,
   } = useProfileQueries(username, {
     // Waterfall: only fetch reviews/complaints after profile is loaded so LCP (profile card) isn't blocked.
     enableListsAfterProfile: true,
@@ -181,137 +182,156 @@ export default function UserProfilePageClient({ username }: UserProfilePageClien
 
   const profileUser = user as (typeof user) & { createdAt?: string };
   const joinedStr = formatJoined(profileUser?.createdAt);
+  const transition = reduceMotion
+    ? { duration: 0 }
+    : { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
 
   return (
     <div className="mx-auto max-w-4xl px-4 pt-8 sm:pt-12 lg:pt-16 pb-16">
-      {loading ? (
-        <UserProfileSkeleton />
-      ) : (
-    <>
-      <div className="card-base">
-        <ProfileHeader
-          user={user!}
-          joinedStr={joinedStr}
-          isLoggedIn={isLoggedIn}
-          isFollowing={isFollowing}
-          followHoverUnfollow={followHoverUnfollow}
-          onFollow={toggleFollow}
-          onFollowHover={setFollowHoverUnfollow}
-          onShare={handleShare}
-        />
-        <ProfileActivitySummary activity={activity} />
-        {stats && <ProfileStatsRow stats={stats} onTabChange={switchTab} />}
-      </div>
+      <AnimatePresence mode="wait" initial={false}>
+        {loading ? (
+          <motion.div
+            key="profile-loading"
+            initial={reduceMotion ? { opacity: 1 } : { opacity: 0.72 }}
+            animate={{ opacity: 1 }}
+            exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+            transition={transition}
+          >
+            <UserProfileSkeleton />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="profile-content"
+            initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+            transition={transition}
+          >
+            <div className="card-base">
+              <ProfileHeader
+                user={user!}
+                joinedStr={joinedStr}
+                isLoggedIn={isLoggedIn}
+                isFollowing={isFollowing}
+                followHoverUnfollow={followHoverUnfollow}
+                onFollow={toggleFollow}
+                onFollowHover={setFollowHoverUnfollow}
+                onShare={handleShare}
+              />
+              <ProfileActivitySummary activity={activity} />
+              {stats && <ProfileStatsRow stats={stats} onTabChange={switchTab} />}
+            </div>
 
-      <div className="mt-6 min-h-[420px]">
-        <ProfileTabList tabs={tabs} activeTab={activeTab} onTabChange={switchTab} />
+            <div className="mt-6 min-h-[420px]">
+              <ProfileTabList tabs={tabs} activeTab={activeTab} onTabChange={switchTab} />
 
-        <div
-          className="space-y-4"
-          role="tabpanel"
-          id="panel-reviews"
-          aria-labelledby="tab-reviews"
-          aria-hidden={activeTab !== "reviews"}
-          hidden={activeTab !== "reviews"}
-          tabIndex={activeTab === "reviews" ? -1 : undefined}
-        >
-          {activeTab === "reviews" && (
-            <ProfileReviewsPanel
-              reviews={reviews}
-              username={username}
-              hasMore={
-                Boolean(
-                  reviewsPagination &&
-                    reviews.length < reviewsPagination.total &&
-                    reviewsPagination.page < reviewsPagination.totalPages,
-                )
-              }
-              loading={loadingReviews}
-              loadingMore={loadingMoreReviews}
-              onLoadMore={loadMoreReviews}
-              onVoteUpdate={updateReviewVote}
-              followStatusByUsername={followStatusByUsername}
-            />
-          )}
-        </div>
+              <div
+                className="space-y-4"
+                role="tabpanel"
+                id="panel-reviews"
+                aria-labelledby="tab-reviews"
+                aria-hidden={activeTab !== "reviews"}
+                hidden={activeTab !== "reviews"}
+                tabIndex={activeTab === "reviews" ? -1 : undefined}
+              >
+                {activeTab === "reviews" && (
+                  <ProfileReviewsPanel
+                    reviews={reviews}
+                    username={username}
+                    hasMore={
+                      Boolean(
+                        reviewsPagination &&
+                          reviews.length < reviewsPagination.total &&
+                          reviewsPagination.page < reviewsPagination.totalPages,
+                      )
+                    }
+                    loading={loadingReviews}
+                    loadingMore={loadingMoreReviews}
+                    onLoadMore={loadMoreReviews}
+                    onVoteUpdate={updateReviewVote}
+                    followStatusByUsername={followStatusByUsername}
+                  />
+                )}
+              </div>
 
-        <div
-          className="space-y-4"
-          role="tabpanel"
-          id="panel-complaints"
-          aria-labelledby="tab-complaints"
-          aria-hidden={activeTab !== "complaints"}
-          hidden={activeTab !== "complaints"}
-          tabIndex={activeTab === "complaints" ? -1 : undefined}
-        >
-          {activeTab === "complaints" && (
-            <ProfileComplaintsPanel
-              complaints={complaints}
-              username={username}
-              hasMore={
-                Boolean(
-                  complaintsPagination &&
-                    complaints.length < complaintsPagination.total &&
-                    complaintsPagination.page < complaintsPagination.totalPages,
-                )
-              }
-              loading={loadingComplaints}
-              loadingMore={loadingMoreComplaints}
-              onLoadMore={loadMoreComplaints}
-            />
-          )}
-        </div>
+              <div
+                className="space-y-4"
+                role="tabpanel"
+                id="panel-complaints"
+                aria-labelledby="tab-complaints"
+                aria-hidden={activeTab !== "complaints"}
+                hidden={activeTab !== "complaints"}
+                tabIndex={activeTab === "complaints" ? -1 : undefined}
+              >
+                {activeTab === "complaints" && (
+                  <ProfileComplaintsPanel
+                    complaints={complaints}
+                    username={username}
+                    hasMore={
+                      Boolean(
+                        complaintsPagination &&
+                          complaints.length < complaintsPagination.total &&
+                          complaintsPagination.page < complaintsPagination.totalPages,
+                      )
+                    }
+                    loading={loadingComplaints}
+                    loadingMore={loadingMoreComplaints}
+                    onLoadMore={loadMoreComplaints}
+                  />
+                )}
+              </div>
 
-        <div
-          className="space-y-4"
-          role="tabpanel"
-          id="panel-followers"
-          aria-labelledby="tab-followers"
-          aria-hidden={activeTab !== "followers"}
-          hidden={activeTab !== "followers"}
-          tabIndex={activeTab === "followers" ? -1 : undefined}
-        >
-          {activeTab === "followers" && (
-            <ProfileFollowersPanel
-              followers={followers}
-              username={username}
-              loading={loadingRelations}
-              followStatusByUsername={followStatusByUsername}
-              currentUsername={currentUser?.username}
-              onFollow={(targetUsername, currentlyFollowing) =>
-                void handleFollowRow(targetUsername, currentlyFollowing)
-              }
-              locale={locale}
-            />
-          )}
-        </div>
+              <div
+                className="space-y-4"
+                role="tabpanel"
+                id="panel-followers"
+                aria-labelledby="tab-followers"
+                aria-hidden={activeTab !== "followers"}
+                hidden={activeTab !== "followers"}
+                tabIndex={activeTab === "followers" ? -1 : undefined}
+              >
+                {activeTab === "followers" && (
+                  <ProfileFollowersPanel
+                    followers={followers}
+                    username={username}
+                    loading={loadingRelations}
+                    followStatusByUsername={followStatusByUsername}
+                    currentUsername={currentUser?.username}
+                    onFollow={(targetUsername, currentlyFollowing) =>
+                      void handleFollowRow(targetUsername, currentlyFollowing)
+                    }
+                    locale={locale}
+                  />
+                )}
+              </div>
 
-        <div
-          className="space-y-4"
-          role="tabpanel"
-          id="panel-following"
-          aria-labelledby="tab-following"
-          aria-hidden={activeTab !== "following"}
-          hidden={activeTab !== "following"}
-          tabIndex={activeTab === "following" ? -1 : undefined}
-        >
-          {activeTab === "following" && (
-            <ProfileFollowingPanel
-              following={following}
-              username={username}
-              loading={loadingRelations}
-              followStatusByUsername={followStatusByUsername}
-              currentUsername={currentUser?.username}
-              onFollow={(targetUsername, currentlyFollowing) =>
-                void handleFollowRow(targetUsername, currentlyFollowing)
-              }
-              locale={locale}
-            />
-          )}
-        </div>
-      </div>
-    </>
-      )}
+              <div
+                className="space-y-4"
+                role="tabpanel"
+                id="panel-following"
+                aria-labelledby="tab-following"
+                aria-hidden={activeTab !== "following"}
+                hidden={activeTab !== "following"}
+                tabIndex={activeTab === "following" ? -1 : undefined}
+              >
+                {activeTab === "following" && (
+                  <ProfileFollowingPanel
+                    following={following}
+                    username={username}
+                    loading={loadingRelations}
+                    followStatusByUsername={followStatusByUsername}
+                    currentUsername={currentUser?.username}
+                    onFollow={(targetUsername, currentlyFollowing) =>
+                      void handleFollowRow(targetUsername, currentlyFollowing)
+                    }
+                    locale={locale}
+                  />
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -21,7 +21,7 @@ export default function ProfileComplaintsPanel({
   onLoadMore,
 }: ProfileComplaintsPanelProps) {
   if (loading) {
-    return <ProfileListSkeleton />;
+    return <ProfileListSkeleton variant="complaint" />;
   }
 
   if (complaints.length === 0) {

@@ -8,6 +8,7 @@ import ServerProviders from '@/app/ServerProviders';
 import DeferredExtras from '@/app/[locale]/DeferredExtras';
 import RouteTransitionProvider from "@/shared/components/animations/RouteTransitionProvider";
 import RouteProgress from "@/shared/components/animations/RouteProgress";
+import RouteWarmup from "@/shared/components/animations/RouteWarmup";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -62,6 +63,7 @@ export default async function LocaleLayout({
     <ServerProviders>
       <NextIntlClientProvider messages={messages}>
         <RouteProgress />
+        <RouteWarmup />
         <RouteTransitionProvider>{children}</RouteTransitionProvider>
         <DeferredExtras initialAnalyticsConsent={initialAnalyticsConsent} />
       </NextIntlClientProvider>

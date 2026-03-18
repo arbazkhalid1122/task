@@ -1,12 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import ProfileListSkeleton from "@/shared/components/ui/ProfileListSkeleton";
 
 export default function FeedLoading() {
-  const t = useTranslations("feed");
-  return (
-    <div className="min-h-[200px] flex items-center justify-center py-8 text-center text-text-primary" role="status" aria-live="polite">
-      {t("loading")}
-    </div>
-  );
+  return <ProfileListSkeleton count={3} variant="review" />;
 }

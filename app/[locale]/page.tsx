@@ -8,6 +8,7 @@ import { getServerReviews } from "@/lib/server-api";
 import HomePageClient from "@/features/home/components/HomePageClient";
 import HomePageContent from "@/features/home/components/HomePageContent";
 import HomeReviewsList from "@/features/reviews/components/HomeReviewsList";
+import FeedLoading from "@/shared/components/feed/FeedLoading";
 
 export async function generateMetadata({
   params,
@@ -39,7 +40,7 @@ export default function Home() {
   return (
     <HomePageClient>
       <HomePageContent>
-        <Suspense fallback={null}>
+        <Suspense fallback={<FeedLoading />}>
           <HomeReviewsAsync />
         </Suspense>
       </HomePageContent>

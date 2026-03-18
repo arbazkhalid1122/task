@@ -46,6 +46,10 @@ interface InitialAuth {
   user: UserProfile | null;
 }
 
+function isNextAuthPending(status: string) {
+  return status === "loading";
+}
+
 export function AuthProvider({
   children,
 }: {
@@ -53,16 +57,21 @@ export function AuthProvider({
 }) {
   const { data: session, status } = useSession();
   const [fallbackAuth, setFallbackAuth] = useState<InitialAuth | null>(null);
+  const [hasResolvedFallback, setHasResolvedFallback] = useState(false);
   const { showToast } = useToast();
 
   const fetchFallbackAuth = useCallback(async () => {
-    const response = await authApi.me();
-    setFallbackAuth({
-      isLoggedIn: !!response.data?.user,
-      user: response.data?.user ?? null,
-    });
-    if (response.error && !isAuthFailureMessage(response.error)) {
-      showToast(response.error, "error");
+    try {
+      const response = await authApi.me();
+      setFallbackAuth({
+        isLoggedIn: !!response.data?.user,
+        user: response.data?.user ?? null,
+      });
+      if (response.error && !isAuthFailureMessage(response.error)) {
+        showToast(response.error, "error");
+      }
+    } finally {
+      setHasResolvedFallback(true);
     }
   }, [showToast]);
 
@@ -70,40 +79,30 @@ export function AuthProvider({
     await fetchFallbackAuth();
   }, [fetchFallbackAuth]);
 
-  // Fetch backend cookie auth once after NextAuth resolves unauthenticated.
   useEffect(() => {
-    if (status !== "unauthenticated" || fallbackAuth != null) return;
+    if (status === "authenticated") {
+      setHasResolvedFallback(true);
+    }
+  }, [status]);
+
+  // Fetch backend cookie auth as soon as NextAuth resolves unauthenticated.
+  useEffect(() => {
+    if (status !== "unauthenticated" || hasResolvedFallback) return;
 
     let cancelled = false;
-    const idleWindow = window as Window & {
-      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-    let handle: number | ReturnType<typeof setTimeout> | null = null;
 
     const run = () => {
       if (cancelled) return;
       void fetchFallbackAuth();
     };
 
-    // Defer this network request so first paint / hydration stays smooth.
-    if (typeof idleWindow.requestIdleCallback === "function") {
-      handle = idleWindow.requestIdleCallback(run, { timeout: 1500 });
-    } else {
-      handle = globalThis.setTimeout(run, 600);
-    }
+    const handle = globalThis.setTimeout(run, 0);
 
     return () => {
       cancelled = true;
-      if (handle != null) {
-        if (typeof handle === "number" && typeof idleWindow.cancelIdleCallback === "function") {
-          idleWindow.cancelIdleCallback(handle);
-        } else {
-          globalThis.clearTimeout(handle);
-        }
-      }
+      globalThis.clearTimeout(handle);
     };
-  }, [status, fallbackAuth, fetchFallbackAuth]);
+  }, [status, hasResolvedFallback, fetchFallbackAuth]);
 
   const resolvedAuth = useMemo(() => {
     if (status === "authenticated" && session?.user) {
@@ -129,7 +128,9 @@ export function AuthProvider({
         isLoggedIn: resolvedAuth.isLoggedIn,
         user: resolvedAuth.user,
         refreshAuth,
-        isAuthLoading: status === "loading",
+        isAuthLoading:
+          isNextAuthPending(status) ||
+          (status === "unauthenticated" && !hasResolvedFallback),
       }}
     >
       {children}

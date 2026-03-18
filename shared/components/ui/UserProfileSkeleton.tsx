@@ -1,14 +1,12 @@
 "use client";
 
 import Skeleton from "@/shared/components/ui/Skeleton";
+import ProfileListSkeleton from "@/shared/components/ui/ProfileListSkeleton";
 
 const PROFILE_HEADER_LINE_WIDTHS = ["w-36", "w-56", "w-28"] as const;
 const STATS_ITEM_WIDTHS = ["w-20", "w-16", "w-14", "w-20", "w-24"] as const;
 const TAB_COUNT = 4;
 const REVIEW_CARD_COUNT = 5;
-const RATING_STAR_COUNT = 5;
-const REVIEW_CONTENT_LINES = 3;
-const META_ITEM_WIDTHS = ["w-24", "w-20", "w-14", "w-14"] as const;
 
 /** Inner content only; parent should use same wrapper as real profile for stable CLS. */
 export default function UserProfileSkeleton() {
@@ -48,40 +46,7 @@ export default function UserProfileSkeleton() {
             ))}
           </div>
 
-          {/* Review cards with rating skeletons */}
-          <div className="space-y-4">
-            {Array.from({ length: REVIEW_CARD_COUNT }).map((_, i) => (
-              <div key={i} className="card-base rounded-lg p-4 sm:p-5 space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Skeleton className="h-5 w-3/4 max-w-xs" />
-                  <Skeleton className="h-4 w-16 rounded-full" />
-                </div>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: RATING_STAR_COUNT }).map((_, starIndex) => (
-                    <Skeleton key={starIndex} className="h-5 w-5" />
-                  ))}
-                  <Skeleton className="ml-2 h-4 w-8" />
-                </div>
-                <div className="space-y-2">
-                  {Array.from({ length: REVIEW_CONTENT_LINES }).map((_, lineIndex) => (
-                    <Skeleton
-                      key={lineIndex}
-                      className={lineIndex < REVIEW_CONTENT_LINES - 1 ? "h-3 w-full" : "h-3 w-4/5"}
-                    />
-                  ))}
-                </div>
-                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[#E5E5E5]">
-                  <Skeleton variant="circle" className="h-8 w-8" />
-                  {META_ITEM_WIDTHS.map((widthClass, metaIndex) => (
-                    <Skeleton
-                      key={metaIndex}
-                      className={metaIndex === 1 ? `h-4 ${widthClass}` : `h-3 ${widthClass}`}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <ProfileListSkeleton count={REVIEW_CARD_COUNT} variant="review" />
         </div>
     </div>
   );

@@ -1,4 +1,6 @@
 export const queryKeys = {
+  trendingOverview: (period: "week" | "month" = "week") =>
+    ["trending-overview", period] as const,
   profile: (username: string) => ["profile", username] as const,
   profileReviews: (username: string, page?: number) =>
     ["profile-reviews", username, page ?? null] as const,
