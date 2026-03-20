@@ -14,11 +14,13 @@ function assertIncludes(source, expected, label) {
 }
 
 const nextConfig = read("next.config.ts");
+const proxyConfig = read("proxy.ts");
 const authConfig = read("auth.ts");
 const envConfig = read("lib/env.ts");
 const packageJson = JSON.parse(read("package.json"));
 
-assertIncludes(nextConfig, "Content-Security-Policy", "CSP header");
+assertIncludes(proxyConfig, "Content-Security-Policy", "CSP header");
+assertIncludes(proxyConfig, "x-nonce", "nonce forwarding header");
 assertIncludes(nextConfig, "validatePublicRuntimeUrls", "public URL security validation");
 assertIncludes(nextConfig, "X-Content-Type-Options", "nosniff header");
 assertIncludes(nextConfig, "X-Frame-Options", "frame header");
