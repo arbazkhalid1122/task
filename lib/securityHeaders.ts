@@ -56,11 +56,13 @@ export function buildCsp(): string {
   ].filter((value): value is string => Boolean(value));
 
   const connectSources = new Set(["'self'", ...origins, ...origins.map(toSocketOrigin)]);
-  const scriptSources = ["'self'"];
+  // Next.js emits small inline bootstrap/runtime scripts that must be allowed
+  // unless a nonce/hash CSP pipeline is implemented end-to-end.
+  const scriptSources = ["'self'", "'unsafe-inline'"];
   const styleSources = ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"];
 
   if (isDevelopment) {
-    scriptSources.push("'unsafe-inline'", "'unsafe-eval'");
+    scriptSources.push("'unsafe-eval'");
   }
 
   const directives = [

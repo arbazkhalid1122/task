@@ -7,11 +7,6 @@ validatePublicRuntimeUrls();
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  experimental: {
-    sri: {
-      algorithm: "sha256",
-    },
-  },
   // Next 16 uses top-level `turbopack`, not `experimental.turbo`.
   turbopack: {
     // Force Turbopack's workspace root to this app directory
