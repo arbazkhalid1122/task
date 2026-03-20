@@ -1,6 +1,8 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
+const isDevelopment = process.env.NODE_ENV !== "production";
+
 function toOrigin(value?: string): string | null {
   if (!value) return null;
   try {
@@ -20,16 +22,46 @@ function toSocketOrigin(origin: string): string {
   return origin;
 }
 
+function isLocalHostUrl(value: string): boolean {
+  try {
+    const { hostname } = new URL(value);
+    return hostname === "localhost" || hostname === "127.0.0.1";
+  } catch {
+    return false;
+  }
+}
+
+function assertSecurePublicUrl(varName: "NEXT_PUBLIC_API_URL" | "NEXT_PUBLIC_SOCKET_URL"): void {
+  const value = process.env[varName];
+  if (!value) return;
+
+  const isHttp = value.startsWith("http://");
+  const isWs = value.startsWith("ws://");
+  if (!isHttp && !isWs) return;
+
+  if (isLocalHostUrl(value)) return;
+
+  if (!isDevelopment) {
+    throw new Error(`${varName} must use https:// or wss:// in production. Received: ${value}`);
+  }
+}
+
+function validatePublicRuntimeUrls(): void {
+  assertSecurePublicUrl("NEXT_PUBLIC_API_URL");
+  assertSecurePublicUrl("NEXT_PUBLIC_SOCKET_URL");
+}
+
 function buildCsp() {
-  const isDevelopment = process.env.NODE_ENV !== "production";
   const origins = [
     toOrigin(process.env.NEXT_PUBLIC_APP_URL),
     toOrigin(process.env.NEXT_PUBLIC_API_URL),
     toOrigin(process.env.NEXT_PUBLIC_SOCKET_URL),
   ].filter((value): value is string => Boolean(value));
   const connectSources = new Set(["'self'", ...origins, ...origins.map(toSocketOrigin)]);
-  const scriptSources = ["'self'", "'unsafe-inline'"];
+  const scriptSources = ["'self'"];
   if (isDevelopment) {
+    // Next.js dev tooling relies on eval/inline scripts; keep this only in development.
+    scriptSources.push("'unsafe-inline'");
     scriptSources.push("'unsafe-eval'");
   }
 
@@ -56,6 +88,8 @@ function buildCsp() {
   return directives.join("; ");
 }
 
+validatePublicRuntimeUrls();
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -74,6 +108,19 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  async rewrites() {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+    if (!apiBase) {
+      return [];
+    }
+
+    return [
+      {
+        source: "/backend/api/:path*",
+        destination: `${apiBase}/api/:path*`,
+      },
+    ];
+  },
   async headers() {
     const csp = buildCsp();
     return [
@@ -83,7 +130,11 @@ const nextConfig: NextConfig = {
           { key: "Content-Security-Policy", value: csp },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+          { key: "Origin-Agent-Cluster", value: "?1" },
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",

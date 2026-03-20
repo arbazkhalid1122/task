@@ -84,8 +84,11 @@ export default function RouteWarmup() {
 
   useEffect(() => {
     const handleWarmIntent = (event: Event) => {
-      const target = event.target as HTMLElement | null;
-      const link = target?.closest("a[href]") as HTMLAnchorElement | null;
+      const target = event.target;
+      if (!(target instanceof Element)) {
+        return;
+      }
+      const link = target.closest("a[href]") as HTMLAnchorElement | null;
       const href = link?.getAttribute("href");
 
       if (!href || !isInternalHref(href) || href.startsWith("#")) return;

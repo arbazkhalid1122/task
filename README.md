@@ -22,6 +22,20 @@ The frontend expects environment variables for backend communication:
 
 `NEXT_PUBLIC_API_URL` is also used on the server for SSR fetches in [`lib/server-api.ts`](./lib/server-api.ts).
 
+### Dev vs Production mode
+
+Mode is determined by `NODE_ENV`:
+
+- `development` when running `npm run dev`
+- `production` when running `npm run build` and `npm run start`
+
+In production mode, the frontend now enforces secure public URLs:
+
+- `NEXT_PUBLIC_API_URL` must use `https://` (except localhost)
+- `NEXT_PUBLIC_SOCKET_URL` must use `https://` or `wss://` (except localhost)
+
+If an insecure URL is configured in production, startup/build fails with an explicit error.
+
 ## Commands
 
 - `npm run dev`: start local development

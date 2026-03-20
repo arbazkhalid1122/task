@@ -19,6 +19,23 @@ function debugWarn(...args: unknown[]) {
   if (isDev) console.warn(...args);
 }
 
+function isLocalHostUrl(value: string): boolean {
+  try {
+    const { hostname } = new URL(value);
+    return hostname === 'localhost' || hostname === '127.0.0.1';
+  } catch {
+    return false;
+  }
+}
+
+function assertSocketUrlSafety(url: string): void {
+  const insecureScheme = url.startsWith('http://') || url.startsWith('ws://');
+  if (!insecureScheme) return;
+  if (isLocalHostUrl(url)) return;
+  if (isDev) return;
+  throw new Error(`NEXT_PUBLIC_SOCKET_URL must use https:// or wss:// in production. Received: ${url}`);
+}
+
 export function getSocket(): Socket | null {
   if (typeof window === 'undefined') {
     return null;
@@ -28,7 +45,8 @@ export function getSocket(): Socket | null {
     const socketUrl =
       process.env.NEXT_PUBLIC_SOCKET_URL ||
       window.location.origin;
-    debugLog('🔌 Initializing socket connection to:', socketUrl);
+    assertSocketUrlSafety(socketUrl);
+    debugLog('Socket initializing');
     if (isDev && !process.env.NEXT_PUBLIC_SOCKET_URL && socketUrl === window.location.origin) {
       debugWarn('💡 Socket will connect to same origin. If your API runs elsewhere, set NEXT_PUBLIC_SOCKET_URL in .env.local');
     }
@@ -47,32 +65,32 @@ export function getSocket(): Socket | null {
 
     // Set up global connection handlers
     socketInstance.on('connect', () => {
-      debugLog('✅ Socket connected, ID:', socketInstance?.id);
+      debugLog('Socket connected');
     });
 
     socketInstance.on('disconnect', (reason) => {
-      debugLog('❌ Socket disconnected, reason:', reason);
+      debugLog('Socket disconnected', reason);
     });
 
     socketInstance.on('connect_error', (error) => {
       // Log as warning so app doesn't look broken; socket is optional (notifications, real-time counts)
-      debugWarn('⚠️ Socket connection failed:', error.message || error);
+      debugWarn('Socket connection failed');
     });
 
     socketInstance.on('reconnect', (attemptNumber) => {
-      debugLog('🔄 Socket reconnected after', attemptNumber, 'attempts');
+      debugLog('Socket reconnected', attemptNumber);
     });
 
     socketInstance.on('reconnect_attempt', (attemptNumber) => {
-      debugLog('🔄 Reconnection attempt', attemptNumber);
+      debugLog('Socket reconnect attempt', attemptNumber);
     });
 
     socketInstance.on('reconnect_error', (error) => {
-      debugWarn('⚠️ Reconnection failed:', error.message || error);
+      debugWarn('Socket reconnect failed');
     });
 
     socketInstance.on('reconnect_failed', () => {
-      debugError('❌ Reconnection failed');
+      debugError('Socket reconnect exhausted');
     });
   }
 
@@ -92,12 +110,12 @@ export function useSocket() {
 
     // Update connection state
     const handleConnect = () => {
-      debugLog('✅ useSocket: Socket connected, ID:', socket?.id);
+      debugLog('useSocket connected');
       setIsConnected(true);
     };
 
     const handleDisconnect = (reason: string) => {
-      debugLog('❌ useSocket: Socket disconnected, reason:', reason);
+      debugLog('useSocket disconnected', reason);
       setIsConnected(false);
     };
 

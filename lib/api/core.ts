@@ -2,6 +2,14 @@ import { getApiBaseUrl } from "@/lib/env";
 import { safeApiMessage } from "@/lib/apiErrors";
 
 const API_BASE = getApiBaseUrl() ? `${getApiBaseUrl()}/api` : "/api";
+const CSRF_COOKIE_CANDIDATES = [
+  "__Host-next-auth.csrf-token",
+  "next-auth.csrf-token",
+  "__Host-authjs.csrf-token",
+  "authjs.csrf-token",
+  "XSRF-TOKEN",
+  "csrfToken",
+];
 
 export interface ApiResponse<T> {
   data?: T;
@@ -25,6 +33,28 @@ export interface PaginatedData<T> {
   items?: T[];
 }
 
+function getCookieValue(name: string): string | null {
+  if (typeof document === "undefined") return null;
+
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = document.cookie.match(new RegExp(`(?:^|; )${escaped}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function getCsrfHeaderValue(): string | null {
+  for (const name of CSRF_COOKIE_CANDIDATES) {
+    const cookieValue = getCookieValue(name);
+    if (!cookieValue) continue;
+
+    const [token] = cookieValue.split("|");
+    if (token?.trim()) {
+      return token;
+    }
+  }
+
+  return null;
+}
+
 export async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
   try {
     const method = (options?.method ?? "GET").toUpperCase();
@@ -32,6 +62,13 @@ export async function fetchApi<T>(endpoint: string, options?: RequestInit): Prom
     const headers = new Headers(options?.headers);
     if (options?.body && !headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");
+    }
+    headers.set("X-Requested-With", "XMLHttpRequest");
+    if (isMutation && !headers.has("X-CSRF-Token")) {
+      const csrfToken = getCsrfHeaderValue();
+      if (csrfToken) {
+        headers.set("X-CSRF-Token", csrfToken);
+      }
     }
 
     const response = await fetch(`${API_BASE}${endpoint}`, {

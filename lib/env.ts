@@ -12,6 +12,34 @@ function normalizeUrl(value?: string): string {
   return typeof value === "string" ? value.replace(/\/$/, "") : "";
 }
 
+function isLocalHostUrl(value: string): boolean {
+  try {
+    const { hostname } = new URL(value);
+    return hostname === "localhost" || hostname === "127.0.0.1";
+  } catch {
+    return false;
+  }
+}
+
+function assertPublicUrlIsSecure(name: string, value: string): void {
+  if (!isProduction() || !value) return;
+  if (value.startsWith("https://")) return;
+  if (isLocalHostUrl(value) && value.startsWith("http://")) return;
+  throw new Error(`${name} must use https:// in production. Received: ${value}`);
+}
+
+function shouldUseDevApiProxy(url: string): boolean {
+  if (typeof window === "undefined" || !url || process.env.NODE_ENV === "production") {
+    return false;
+  }
+
+  try {
+    return new URL(url).origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
 /** For server-side code (e.g. auth.ts). In production, throws if no URL is set. */
 export function getBackendUrl(): string {
   const internal =
@@ -30,10 +58,17 @@ export function getBackendUrl(): string {
 /** For client-side API calls. Set NEXT_PUBLIC_API_URL in .env for dev. */
 export function getApiBaseUrl(): string {
   if (typeof process === "undefined") return "";
-  return normalizeUrl(process.env.NEXT_PUBLIC_API_URL);
+  const url = normalizeUrl(process.env.NEXT_PUBLIC_API_URL);
+  assertPublicUrlIsSecure("NEXT_PUBLIC_API_URL", url);
+  if (shouldUseDevApiProxy(url)) {
+    return "/backend";
+  }
+  return url;
 }
 
 export function getPublicAppUrl(): string {
   if (typeof process === "undefined") return "";
-  return normalizeUrl(process.env.NEXT_PUBLIC_APP_URL);
+  const url = normalizeUrl(process.env.NEXT_PUBLIC_APP_URL);
+  assertPublicUrlIsSecure("NEXT_PUBLIC_APP_URL", url);
+  return url;
 }

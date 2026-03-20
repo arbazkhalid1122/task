@@ -142,11 +142,17 @@ export async function getServerProfileReviews(
   if (!base) return { reviews: [], pagination: { page: 1, total: 0, totalPages: 0 } };
   const page = options?.page ?? 1;
   const limit = options?.limit ?? PROFILE_PAGE_SIZE;
+  const hasAuthContext = hasLikelyAuthCookie(options?.cookieHeader);
   try {
     const url = `${base}/api/reviews?username=${encodeURIComponent(username)}&page=${page}&limit=${limit}`;
     const headers: HeadersInit = {};
     if (options?.cookieHeader) headers["Cookie"] = options.cookieHeader;
-    const res = await fetch(url, { headers, next: { revalidate: 30 } });
+    const res = await fetch(url, {
+      headers,
+      ...(hasAuthContext
+        ? { cache: "no-store" as const }
+        : { next: { revalidate: 30 } }),
+    });
     if (!res.ok) return { reviews: [], pagination: { page: 1, total: 0, totalPages: 0 } };
     const data = (await res.json()) as {
       reviews?: Review[];
@@ -176,11 +182,17 @@ export async function getServerProfileComplaints(
   if (!base) return { complaints: [], pagination: { page: 1, total: 0, totalPages: 0 } };
   const page = options?.page ?? 1;
   const limit = options?.limit ?? PROFILE_PAGE_SIZE;
+  const hasAuthContext = hasLikelyAuthCookie(options?.cookieHeader);
   try {
     const url = `${base}/api/complaints?username=${encodeURIComponent(username)}&page=${page}&limit=${limit}`;
     const headers: HeadersInit = {};
     if (options?.cookieHeader) headers["Cookie"] = options.cookieHeader;
-    const res = await fetch(url, { headers, next: { revalidate: 30 } });
+    const res = await fetch(url, {
+      headers,
+      ...(hasAuthContext
+        ? { cache: "no-store" as const }
+        : { next: { revalidate: 30 } }),
+    });
     if (!res.ok) return { complaints: [], pagination: { page: 1, total: 0, totalPages: 0 } };
     const data = (await res.json()) as {
       complaints?: Complaint[];
@@ -210,6 +222,7 @@ export async function getServerComplaints(options?: {
   if (!base) return { complaints: [] };
   const limit = options?.limit ?? PAGE_SIZE;
   const page = options?.page ?? 1;
+  const hasAuthContext = hasLikelyAuthCookie(options?.cookieHeader);
   try {
     const url = `${base}/api/complaints?limit=${limit}&page=${page}`;
     const headers: HeadersInit = {};
@@ -218,7 +231,9 @@ export async function getServerComplaints(options?: {
     }
     const res = await fetch(url, {
       headers,
-      next: { revalidate: 30 },
+      ...(hasAuthContext
+        ? { cache: "no-store" as const }
+        : { next: { revalidate: 30 } }),
     });
     if (!res.ok) {
       return { complaints: [] };
