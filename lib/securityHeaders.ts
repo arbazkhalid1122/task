@@ -48,7 +48,7 @@ export function validatePublicRuntimeUrls(): void {
   assertSecurePublicUrl("NEXT_PUBLIC_SOCKET_URL");
 }
 
-export function buildCsp(nonce?: string): string {
+export function buildCsp(): string {
   const origins = [
     toOrigin(process.env.NEXT_PUBLIC_APP_URL),
     toOrigin(process.env.NEXT_PUBLIC_API_URL),
@@ -57,18 +57,10 @@ export function buildCsp(nonce?: string): string {
 
   const connectSources = new Set(["'self'", ...origins, ...origins.map(toSocketOrigin)]);
   const scriptSources = ["'self'"];
-  const styleSources = ["'self'", "https://fonts.googleapis.com"];
-
-  if (nonce) {
-    scriptSources.push(`'nonce-${nonce}'`, "'strict-dynamic'");
-    if (!isDevelopment) {
-      styleSources.splice(1, 0, `'nonce-${nonce}'`);
-    }
-  }
+  const styleSources = ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"];
 
   if (isDevelopment) {
     scriptSources.push("'unsafe-inline'", "'unsafe-eval'");
-    styleSources.splice(1, 0, "'unsafe-inline'");
   }
 
   const directives = [

@@ -1,12 +1,17 @@
 import path from "node:path";
 import type { NextConfig } from "next";
-import { validatePublicRuntimeUrls } from "@/lib/securityHeaders";
+import { buildCsp, validatePublicRuntimeUrls } from "@/lib/securityHeaders";
 
 validatePublicRuntimeUrls();
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  experimental: {
+    sri: {
+      algorithm: "sha256",
+    },
+  },
   // Next 16 uses top-level `turbopack`, not `experimental.turbo`.
   turbopack: {
     // Force Turbopack's workspace root to this app directory
@@ -36,10 +41,12 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
+    const csp = buildCsp();
     return [
       {
         source: "/:path*",
         headers: [
+          { key: "Content-Security-Policy", value: csp },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },

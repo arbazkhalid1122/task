@@ -63,7 +63,6 @@ export async function fetchApi<T>(endpoint: string, options?: RequestInit): Prom
     if (options?.body && !headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");
     }
-    headers.set("X-Requested-With", "XMLHttpRequest");
     if (isMutation && !headers.has("X-CSRF-Token")) {
       const csrfToken = getCsrfHeaderValue();
       if (csrfToken) {

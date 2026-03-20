@@ -19,13 +19,14 @@ const authConfig = read("auth.ts");
 const envConfig = read("lib/env.ts");
 const packageJson = JSON.parse(read("package.json"));
 
-assertIncludes(proxyConfig, "Content-Security-Policy", "CSP header");
-assertIncludes(proxyConfig, "x-nonce", "nonce forwarding header");
+assertIncludes(nextConfig, "Content-Security-Policy", "CSP header");
+assertIncludes(nextConfig, "sri", "SRI config");
 assertIncludes(nextConfig, "validatePublicRuntimeUrls", "public URL security validation");
 assertIncludes(nextConfig, "X-Content-Type-Options", "nosniff header");
 assertIncludes(nextConfig, "X-Frame-Options", "frame header");
 assertIncludes(nextConfig, "Referrer-Policy", "referrer policy");
 assertIncludes(nextConfig, "Permissions-Policy", "permissions policy");
+assertIncludes(proxyConfig, "createMiddleware", "i18n proxy");
 
 assertIncludes(authConfig, "useSecureCookies", "secure NextAuth cookie config");
 assertIncludes(authConfig, "sessionToken", "session cookie override");
