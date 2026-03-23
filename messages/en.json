@@ -141,7 +141,8 @@
     "confirmPassword": "Confirm new password",
     "confirmPasswordPlaceholder": "Confirm new password",
     "updatePassword": "Update password",
-    "passwordChanged": "Password changed successfully"
+    "passwordChanged": "Password changed successfully",
+    "passwordChangedAllSessions": "Password changed successfully. You've been signed out of all other devices."
   },
   "complaints": {
     "submitted": "Complaint submitted successfully",

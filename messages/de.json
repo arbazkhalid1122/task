@@ -136,7 +136,8 @@
     "confirmPassword": "Neues Passwort bestätigen",
     "confirmPasswordPlaceholder": "Neues Passwort bestätigen",
     "updatePassword": "Passwort aktualisieren",
-    "passwordChanged": "Passwort wurde geändert"
+    "passwordChanged": "Passwort wurde geändert",
+    "passwordChangedAllSessions": "Passwort erfolgreich geändert. Sie wurden auf allen anderen Geräten abgemeldet."
   },
   "privacy": {
     "title": "Datenschutzerklärung",

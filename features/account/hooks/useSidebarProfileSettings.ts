@@ -168,7 +168,8 @@ export function useSidebarProfileSettings(enabled: boolean) {
         return;
       }
 
-      showToast(t("profile.passwordChanged"), "success");
+      await refreshAuth();
+      showToast(t("profile.passwordChangedAllSessions"), "success");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
