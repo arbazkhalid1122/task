@@ -105,7 +105,7 @@
   },
   "cookieConsent": {
     "title": "Cookie consent",
-    "message": "We use analytics to improve the site (IP, location, device). By accepting you agree to our",
+    "message": "We use analytics to improve the site. This includes your IP address, location, device and browser info, timezone, session duration, referral source, UTM campaign parameters, funnel events (e.g. signup, likes), and account linking when signed in. By accepting you agree to our",
     "privacyLink": "Privacy Policy",
     "accept": "Accept",
     "decline": "Decline"

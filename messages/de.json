@@ -100,7 +100,7 @@
   },
   "cookieConsent": {
     "title": "Cookie-Einwilligung",
-    "message": "Wir nutzen Analysen zur Verbesserung der Seite (IP, Standort, Gerät). Mit Akzeptieren stimmen Sie unserer",
+    "message": "Wir nutzen Analysen zur Verbesserung der Seite. Dies umfasst Ihre IP-Adresse, Standort, Geräte- und Browser-Informationen, Zeitzone, Sitzungsdauer, Verweisquelle, UTM-Kampagnenparameter, Funnel-Ereignisse (z. B. Registrierung, Likes) und Kontoverknüpfung bei Anmeldung. Mit Akzeptieren stimmen Sie unserer",
     "privacyLink": "Datenschutzerklärung",
     "accept": "Akzeptieren",
     "decline": "Ablehnen"

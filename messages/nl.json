@@ -100,7 +100,7 @@
   },
   "cookieConsent": {
     "title": "Cookie toestemming",
-    "message": "We gebruiken analytics om de site te verbeteren (IP, locatie, apparaat). Door te accepteren gaat u akkoord met ons",
+    "message": "We gebruiken analytics om de site te verbeteren. Dit omvat uw IP-adres, locatie, apparaat- en browserinformatie, tijdzone, sessieduur, verwijzingsbron, UTM-campagneparameters, funnel-gebeurtenissen (bijv. aanmelding, likes) en accountkoppeling wanneer u bent ingelogd. Door te accepteren gaat u akkoord met ons",
     "privacyLink": "Privacybeleid",
     "accept": "Accepteren",
     "decline": "Weigeren"

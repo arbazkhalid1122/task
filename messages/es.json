@@ -81,7 +81,16 @@
     "reviewsAddedToday": "¡150 Reseñas y 27 Quejas Agregadas Hoy!"
   },
   "footer": {
-    "copyright": "Copyright © 2026 Brand • Todos los derechos reservados"
+    "copyright": "Copyright © 2026 Brand • Todos los derechos reservados",
+    "title": "cryptoi",
+    "privacy": "Política de privacidad"
+  },
+  "cookieConsent": {
+    "title": "Consentimiento de cookies",
+    "message": "Usamos análisis para mejorar el sitio. Esto incluye su dirección IP, ubicación, información del dispositivo y navegador, zona horaria, duración de la sesión, fuente de referencia, parámetros de campaña UTM, eventos de embudo (p. ej. registro, likes) y vinculación de cuenta cuando ha iniciado sesión. Al aceptar acepta nuestra",
+    "privacyLink": "Política de privacidad",
+    "accept": "Aceptar",
+    "decline": "Rechazar"
   },
   "notifications": {
     "title": "Notificaciones",

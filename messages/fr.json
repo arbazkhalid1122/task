@@ -95,7 +95,15 @@
   },
   "footer": {
     "copyright": "Copyright © 2026 Brand • Tous droits réservés",
-    "title": "cryptoi"
+    "title": "cryptoi",
+    "privacy": "Politique de confidentialité"
+  },
+  "cookieConsent": {
+    "title": "Consentement aux cookies",
+    "message": "Nous utilisons des analyses pour améliorer le site. Cela inclut votre adresse IP, votre localisation, les informations sur l'appareil et le navigateur, le fuseau horaire, la durée de session, la source de référence, les paramètres de campagne UTM, les événements d'entonnoir (ex. inscription, likes) et l'association de compte lorsque vous êtes connecté. En acceptant vous acceptez notre",
+    "privacyLink": "Politique de confidentialité",
+    "accept": "Accepter",
+    "decline": "Refuser"
   },
   "notifications": {
     "title": "Notifications",
