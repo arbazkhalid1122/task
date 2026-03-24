@@ -128,7 +128,8 @@
     "confirmPassword": "Confirmer le mot de passe",
     "confirmPasswordPlaceholder": "Confirmer le mot de passe",
     "updatePassword": "Mettre à jour le mot de passe",
-    "passwordChanged": "Mot de passe modifié"
+    "passwordChanged": "Mot de passe modifié",
+    "passwordChangedAllSessions": "Mot de passe modifié avec succès. Vous avez été déconnecté de tous les autres appareils."
   }
 }
 

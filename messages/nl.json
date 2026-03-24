@@ -136,7 +136,8 @@
     "confirmPassword": "Nieuw wachtwoord bevestigen",
     "confirmPasswordPlaceholder": "Nieuw wachtwoord bevestigen",
     "updatePassword": "Wachtwoord bijwerken",
-    "passwordChanged": "Wachtwoord gewijzigd"
+    "passwordChanged": "Wachtwoord gewijzigd",
+    "passwordChangedAllSessions": "Wachtwoord succesvol gewijzigd. U bent uitgelogd op alle andere apparaten."
   },
   "privacy": {
     "title": "Privacybeleid",

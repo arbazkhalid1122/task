@@ -114,7 +114,8 @@
     "confirmPassword": "Confirmar contraseña",
     "confirmPasswordPlaceholder": "Confirmar nueva contraseña",
     "updatePassword": "Actualizar contraseña",
-    "passwordChanged": "Contraseña actualizada"
+    "passwordChanged": "Contraseña actualizada",
+    "passwordChangedAllSessions": "Contraseña actualizada correctamente. Se ha cerrado la sesión en todos los demás dispositivos."
   }
 }
 
