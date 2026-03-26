@@ -115,7 +115,11 @@
     "markAllRead": "Mark all as read",
     "loading": "Loading…",
     "empty": "No notifications yet",
-    "redirecting": "Redirecting…"
+    "redirecting": "Redirecting…",
+    "viewAll": "View All",
+    "unread": "unread",
+    "enabling": "Enabling…",
+    "enableBrowser": "Enable browser notifications"
   },
   "profile": {
     "editTitle": "Edit Profile",

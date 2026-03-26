@@ -118,7 +118,7 @@ export default function NotificationsMenu({ displayName, enabled }: Notification
               className="block text-xs font-semibold text-primary hover:underline"
               onClick={() => setIsOpen(false)}
             >
-              {t("notifications.viewAll", { defaultValue: "View all" })}
+              {t("notifications.viewAll", { defaultValue: "View All" })}
             </Link>
             {(pushStatus === "prompt" || pushStatus === "error") && (
               <button

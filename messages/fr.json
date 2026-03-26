@@ -102,7 +102,11 @@
     "markAllRead": "Tout marquer comme lu",
     "loading": "Chargement…",
     "empty": "Aucune notification",
-    "redirecting": "Redirection…"
+    "redirecting": "Redirection…",
+    "viewAll": "Tout afficher",
+    "unread": "non lues",
+    "enabling": "Activation…",
+    "enableBrowser": "Activer les notifications du navigateur"
   },
   "profile": {
     "editTitle": "Modifier le profil",

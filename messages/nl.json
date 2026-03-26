@@ -110,7 +110,11 @@
     "markAllRead": "Alles als gelezen markeren",
     "loading": "Laden…",
     "empty": "Nog geen meldingen",
-    "redirecting": "Doorverwijzen…"
+    "redirecting": "Doorverwijzen…",
+    "viewAll": "Alles bekijken",
+    "unread": "ongelezen",
+    "enabling": "Inschakelen…",
+    "enableBrowser": "Browsermeldingen inschakelen"
   },
   "profile": {
     "editTitle": "Profiel bewerken",

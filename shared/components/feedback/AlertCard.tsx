@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from 'next-intl';
-import { MoreHorizontalIcon } from "@/shared/components/ui/Icons";
+import { MoreVerticalIcon } from "@/shared/components/ui/Icons";
 
 interface AlertCardProps {
   alert: {
@@ -41,9 +41,9 @@ export default function AlertCard({ alert, index }: AlertCardProps) {
   return (
     <div className={index === 1 ? "space-y-1 text-xs font-semibold" : ""}>
       <div className={`${alert.height} rounded-md ${alert.bgColor} ${alert.padding} text-xs font-semibold ${alert.textColor}`}>
-        <div className="flex justify-between items-start gap-2">
-          <span className="break-words flex-1">{getTranslatedTitle()}</span>
-          <MoreHorizontalIcon className="inline-block h-4 w-4 flex-shrink-0" />
+        <div className="flex flex-row flex-nowrap items-start justify-between gap-2">
+          <span className="min-w-0 flex-1 break-words">{getTranslatedTitle()}</span>
+          <MoreVerticalIcon className="h-4 w-4 shrink-0" aria-hidden />
         </div>
         {alert.hasScore ? (
           <>

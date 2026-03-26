@@ -110,7 +110,11 @@
     "markAllRead": "Alle als gelesen markieren",
     "loading": "Wird geladen…",
     "empty": "Noch keine Benachrichtigungen",
-    "redirecting": "Weiterleitung…"
+    "redirecting": "Weiterleitung…",
+    "viewAll": "Alle anzeigen",
+    "unread": "ungelesen",
+    "enabling": "Wird aktiviert…",
+    "enableBrowser": "Browser-Benachrichtigungen aktivieren"
   },
   "profile": {
     "editTitle": "Profil bearbeiten",
