@@ -58,6 +58,8 @@ interface CommentItemProps extends Omit<CommentThreadProps, "comments"> {
   maxDepth: number;
 }
 
+const REPLIES_PAGE_SIZE = 10;
+
 function CommentItem({ comment, reviewId, postId, complaintId, onCommentAdded, onVoteUpdate, depth, maxDepth }: CommentItemProps) {
   const t = useTranslations();
   const { showToast } = useToast();
@@ -66,6 +68,11 @@ function CommentItem({ comment, reviewId, postId, complaintId, onCommentAdded, o
   const [replyError, setReplyError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localReplies, setLocalReplies] = useState<Comment[]>(comment.replies || []);
+  const [repliesLoaded, setRepliesLoaded] = useState(Boolean((comment.replies?.length ?? 0) > 0));
+  const [loadingReplies, setLoadingReplies] = useState(false);
+  const [loadingMoreReplies, setLoadingMoreReplies] = useState(false);
+  const [repliesNextCursor, setRepliesNextCursor] = useState<string | null>(null);
+  const [hasMoreReplies, setHasMoreReplies] = useState(false);
 
   const { helpfulCount, downVoteCount, isUpVoted, isDownVoted, handleVote } = useVote({
     entityId: comment.id,
@@ -83,6 +90,43 @@ function CommentItem({ comment, reviewId, postId, complaintId, onCommentAdded, o
       return formatDistanceToNow(new Date(dateString), { addSuffix: true });
     } catch {
       return t("common.time.hoursAgo");
+    }
+  };
+
+  const loadReplies = async ({ append }: { append: boolean }) => {
+    if (append && !repliesNextCursor) return;
+    if (append) {
+      setLoadingMoreReplies(true);
+    } else {
+      setLoadingReplies(true);
+    }
+
+    try {
+      const result = await commentsApi.list({
+        reviewId,
+        postId,
+        complaintId,
+        parentId: comment.id,
+        limit: REPLIES_PAGE_SIZE,
+        cursor: append ? repliesNextCursor ?? undefined : undefined,
+      });
+
+      if (result.error) {
+        showToast(safeApiMessage(result.error), "error");
+        return;
+      }
+
+      const items = result.data?.comments ?? [];
+      setLocalReplies((prev) => (append ? [...prev, ...items] : items));
+      setRepliesNextCursor(result.data?.pagination?.nextCursor ?? null);
+      setHasMoreReplies(Boolean(result.data?.pagination?.hasMore));
+      setRepliesLoaded(true);
+    } finally {
+      if (append) {
+        setLoadingMoreReplies(false);
+      } else {
+        setLoadingReplies(false);
+      }
     }
   };
 
@@ -115,6 +159,7 @@ function CommentItem({ comment, reviewId, postId, complaintId, onCommentAdded, o
         setReplyContent("");
         setReplyError("");
         setShowReplyForm(false);
+        setRepliesLoaded(true);
         onCommentAdded?.();
       }
     } catch (error) {
@@ -160,8 +205,18 @@ function CommentItem({ comment, reviewId, postId, complaintId, onCommentAdded, o
                 {t("common.comment.reply")}
               </button>
               <span className="text-xs text-text-quaternary">
-                {localReplies.length} {localReplies.length === 1 ? t("common.comment.reply") : t("common.comment.replies")}
+                {comment._count?.replies ?? localReplies.length} {(comment._count?.replies ?? localReplies.length) === 1 ? t("common.comment.reply") : t("common.comment.replies")}
               </span>
+              {depth < maxDepth && (comment._count?.replies ?? 0) > 0 && !repliesLoaded && (
+                <button
+                  type="button"
+                  onClick={() => void loadReplies({ append: false })}
+                  className="action-btn"
+                  disabled={loadingReplies}
+                >
+                  {loadingReplies ? t("common.auth.processing") : "View replies"}
+                </button>
+              )}
             </div>
 
             {showReplyForm && (
@@ -194,6 +249,18 @@ function CommentItem({ comment, reviewId, postId, complaintId, onCommentAdded, o
                     maxDepth={maxDepth}
                   />
                 ))}
+                {hasMoreReplies && (
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={() => void loadReplies({ append: true })}
+                      className="action-btn"
+                      disabled={loadingMoreReplies}
+                    >
+                      {loadingMoreReplies ? t("common.auth.processing") : "Load more replies"}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

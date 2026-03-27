@@ -4,10 +4,20 @@ import type { NextConfig } from "next";
 import { buildCsp, validatePublicRuntimeUrls } from "@/lib/securityHeaders";
 
 validatePublicRuntimeUrls();
+const shouldUploadSentryArtifacts = process.env.SENTRY_UPLOAD_SOURCEMAPS === "1";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24,
+    remotePatterns: [
+      { protocol: "https", hostname: "**" },
+      { protocol: "http", hostname: "localhost" },
+      { protocol: "http", hostname: "127.0.0.1" },
+    ],
+  },
   // Next 16 uses top-level `turbopack`, not `experimental.turbo`.
   turbopack: {
     // Force Turbopack's workspace root to this app directory
@@ -40,6 +50,27 @@ const nextConfig: NextConfig = {
     const csp = buildCsp();
     return [
       {
+        source: "/_next/static/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        source: "/_next/image",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+        ],
+      },
+      {
         source: "/:path*",
         headers: [
           { key: "Content-Security-Policy", value: csp },
@@ -68,9 +99,8 @@ export default withSentryConfig(nextConfig, {
 
   project: "javascript-nextjs",
 
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
-
+  // Only print Sentry upload logs when uploads are explicitly enabled.
+  silent: !shouldUploadSentryArtifacts,
   // For all available options, see:
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
 
@@ -78,14 +108,19 @@ export default withSentryConfig(nextConfig, {
   widenClientFileUpload: true,
   // Keep source maps private: upload to Sentry, then remove from artifacts.
   sourcemaps: {
+    disable: !shouldUploadSentryArtifacts,
     deleteSourcemapsAfterUpload: true,
+  },
+  release: {
+    create: shouldUploadSentryArtifacts,
+    finalize: shouldUploadSentryArtifacts,
   },
 
   // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
   // This can increase your server load as well as your hosting bill.
   // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
   // side errors will fail.
-  tunnelRoute: "/monitoring",
+  tunnelRoute: process.env.NODE_ENV === "production" ? "/monitoring" : undefined,
 
   webpack: {
     // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)

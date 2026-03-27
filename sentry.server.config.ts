@@ -4,9 +4,15 @@
 
 import * as Sentry from "@sentry/nextjs";
 
+const dsn = process.env.SENTRY_DSN;
+const isEnabled = Boolean(dsn);
+
 Sentry.init({
   // Server env var (not exposed to the browser).
-  dsn: process.env.SENTRY_DSN,
+  dsn,
+  enabled: isEnabled,
+  environment: process.env.NODE_ENV ?? "development",
+  debug: process.env.NODE_ENV === "development",
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,
