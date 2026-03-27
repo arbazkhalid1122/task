@@ -16,6 +16,7 @@ import ReviewScore from "@/features/reviews/components/ReviewScore";
 import { formatReviewTimeAgo, translateWithFallback } from "@/features/reviews/utils/reviewFormatting";
 import { reviewsApi } from "@/features/reviews/api/client";
 import { useVote } from "@/shared/hooks/useVote";
+import { trackAnalyticsEvent } from "@/shared/components/analytics/AnalyticsTracker";
 import { DotIcon } from "@/shared/components/ui/Icons";
 import type { Review } from "@/lib/types";
 
@@ -38,8 +39,11 @@ export default function ReviewCard({
     initialDownVoteCount: review.downVoteCount ?? 0,
     initialUserVote: review.userVote ?? null,
     voteRequest: reviewsApi.vote,
-    onSuccess: (nextHelpfulCount, nextDownVoteCount) => {
+    onSuccess: (nextHelpfulCount, nextDownVoteCount, voteType) => {
       onVoteUpdate?.(review.id, nextHelpfulCount, nextDownVoteCount);
+      if (voteType === "UP") {
+        trackAnalyticsEvent("like");
+      }
     },
   });
 
@@ -52,7 +56,10 @@ export default function ReviewCard({
     setCommentContent,
     isSubmittingComment,
     commentCount,
+    hasMoreComments,
+    loadingMoreComments,
     fetchComments,
+    loadMoreComments,
     handleToggleComments,
     submitComment,
   } = useComments({ targetKey: "reviewId", targetId: review.id, initialCount: review._count?.comments ?? 0 });
@@ -187,16 +194,30 @@ export default function ReviewCard({
               {loadingComments ? (
                 <div className="py-4 text-center text-sm text-text-quaternary">{loadingCommentsLabel}</div>
               ) : comments.length > 0 ? (
-                <CommentThread
-                  comments={comments}
-                  reviewId={review.id}
-                  onCommentAdded={() => void fetchComments({ force: true })}
-                  onVoteUpdate={(commentId, nextHelpfulCount, nextDownVoteCount) => {
-                    setComments((prev) =>
-                      prev.map((comment) => (comment.id === commentId ? { ...comment, helpfulCount: nextHelpfulCount, downVoteCount: nextDownVoteCount } : comment)),
-                    );
-                  }}
-                />
+                <>
+                  <CommentThread
+                    comments={comments}
+                    reviewId={review.id}
+                    onCommentAdded={() => void fetchComments({ force: true })}
+                    onVoteUpdate={(commentId, nextHelpfulCount, nextDownVoteCount) => {
+                      setComments((prev) =>
+                        prev.map((comment) => (comment.id === commentId ? { ...comment, helpfulCount: nextHelpfulCount, downVoteCount: nextDownVoteCount } : comment)),
+                      );
+                    }}
+                  />
+                  {hasMoreComments && (
+                    <div className="mt-4 flex justify-center">
+                      <button
+                        type="button"
+                        className="action-btn-strong"
+                        onClick={() => void loadMoreComments()}
+                        disabled={loadingMoreComments}
+                      >
+                        {loadingMoreComments ? t("common.auth.processing") : "Load more comments"}
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="py-4 text-center text-sm text-text-quaternary">
                   {emptyCommentsLabel}

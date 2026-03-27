@@ -16,6 +16,8 @@ interface UseCommentsOptions {
   initialCount?: number;
 }
 
+const TOP_LEVEL_PAGE_SIZE = 20;
+
 export function useComments({ targetKey, targetId, initialCount = 0 }: UseCommentsOptions) {
   const { showToast } = useToast();
   const { socket } = useSocket();
@@ -25,6 +27,9 @@ export function useComments({ targetKey, targetId, initialCount = 0 }: UseCommen
   const [commentContent, setCommentContent] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [commentCount, setCommentCount] = useState(initialCount);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMoreComments, setHasMoreComments] = useState(false);
+  const [loadingMoreComments, setLoadingMoreComments] = useState(false);
 
   useEffect(() => {
     if (targetKey !== "reviewId" || !socket) return;
@@ -45,14 +50,44 @@ export function useComments({ targetKey, targetId, initialCount = 0 }: UseCommen
     if (!force && comments.length > 0) return;
     setLoadingComments(true);
     try {
-      const response = await commentsApi.list(buildCommentFilter());
+      const response = await commentsApi.list({
+        ...buildCommentFilter(),
+        limit: TOP_LEVEL_PAGE_SIZE,
+      });
       if (response.data?.comments) {
         setComments(response.data.comments);
+        setNextCursor(response.data.pagination?.nextCursor ?? null);
+        setHasMoreComments(Boolean(response.data.pagination?.hasMore));
+        if (typeof response.data.totalCount === "number") {
+          setCommentCount(response.data.totalCount);
+        }
       } else if (response.error) {
         showToast(safeApiMessage(response.error), "error");
       }
     } finally {
       setLoadingComments(false);
+    }
+  };
+
+  const loadMoreComments = async () => {
+    if (!nextCursor || loadingMoreComments) return;
+    setLoadingMoreComments(true);
+    try {
+      const response = await commentsApi.list({
+        ...buildCommentFilter(),
+        limit: TOP_LEVEL_PAGE_SIZE,
+        cursor: nextCursor,
+      });
+      const data = response.data;
+      if (data?.comments) {
+        setComments((prev) => [...prev, ...data.comments]);
+        setNextCursor(data.pagination?.nextCursor ?? null);
+        setHasMoreComments(Boolean(data.pagination?.hasMore));
+      } else if (response.error) {
+        showToast(safeApiMessage(response.error), "error");
+      }
+    } finally {
+      setLoadingMoreComments(false);
     }
   };
 
@@ -101,7 +136,10 @@ export function useComments({ targetKey, targetId, initialCount = 0 }: UseCommen
     setCommentContent,
     isSubmittingComment,
     commentCount,
+    hasMoreComments,
+    loadingMoreComments,
     fetchComments,
+    loadMoreComments,
     handleToggleComments,
     submitComment,
   };
